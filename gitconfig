@@ -1,0 +1,21 @@
+[user]
+	name = ykwoshia
+	email = ykwoshia@126.com
+
+[core]
+	editor = vim
+
+[merge]
+    tool = vimdiff
+[alias]
+	st = status
+	ci = commit
+	co = checkout
+	br = branch
+	rh = reset HEAD
+[credential]
+	helper = store
+[https]
+#        proxy = socks5://127.0.0.1:1080
+[http]
+#        proxy = socks5://127.0.0.1:1080

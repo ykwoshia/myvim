@@ -1,0 +1,26 @@
+* how to install fuzzyfinder
+** google fuzzy finder
+** http://www.vim.org/scripts/script.php?script_id=1984 
+FuzzyFinder : buffer/file/command/tag/etc explorer with fuzzy matching 
+** browse down the page, download vim-fuzzyfinder.zip version 4.2.2
+** unzip file to vim runtime dir: ~/.fzf
+** add vim runtime dir in .vimrc
+set rtp+=~/.fzf 
+** make key binding
+nnoremap <Leader>f :FufFile **/<cr>
+nnoremap <Leader>b :FufBuffer<cr>
+nnoremap <Leader>t :FufTag<cr>  
+
+* syntastic c++11
+** syntastic/checker/cpp/gcc/ compile option+ c++11
+* how to install spacemacs
+** go to spacemacs github use git clone
+* how to install source-code-pro font
+** #!/bin/bash
+** mkdir /tmp/adodefont
+** cd /tmp/adodefont
+** wget https://github.com/adobe-fonts/source-code-pro/archive/2.010R-ro/1.030R-it.zip
+** unzip 1.030R-it.zip
+** mkdir -p ~/.fonts
+** cp source-code-pro-2.010R-ro-1.030R-it/OTF/*.otf ~/.fonts/
+** fc-cache -f -v

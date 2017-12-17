@@ -1,0 +1,1038 @@
+" =============================================================================
+"        << 判断操作系统是 Windows 还是 Linux 和判断是终端还是 Gvim >>
+" =============================================================================
+
+" -----------------------------------------------------------------------------
+"  < 判断操作系统是否是 Windows 还是 Linux >
+" -----------------------------------------------------------------------------
+if(has("win32") || has("win64") || has("win95") || has("win16"))
+    let g:iswindows = 1
+else
+    let g:iswindows = 0
+endif
+
+" -----------------------------------------------------------------------------
+"  < 判断是终端还是 Gvim >
+" -----------------------------------------------------------------------------
+if has("gui_running")
+    let g:isGUI = 1
+else
+    let g:isGUI = 0
+endif
+
+
+" =============================================================================
+"                          << 以下为软件默认配置 >>
+" =============================================================================
+
+" -----------------------------------------------------------------------------
+"  < Windows Gvim 默认配置> 做了一点修改
+" -----------------------------------------------------------------------------
+if (g:iswindows && g:isGUI)
+    source $VIMRUNTIME/vimrc_example.vim
+    source $VIMRUNTIME/mswin.vim
+    behave mswin
+    set diffexpr=MyDiff()
+
+    function MyDiff()
+        let opt = '-a --binary '
+        if &diffopt =~ 'icase' | let opt = opt . '-i ' | endif
+        if &diffopt =~ 'iwhite' | let opt = opt . '-b ' | endif
+        let arg1 = v:fname_in
+        if arg1 =~ ' ' | let arg1 = '"' . arg1 . '"' | endif
+        let arg2 = v:fname_new
+        if arg2 =~ ' ' | let arg2 = '"' . arg2 . '"' | endif
+        let arg3 = v:fname_out
+        if arg3 =~ ' ' | let arg3 = '"' . arg3 . '"' | endif
+        let eq = ''
+        if $VIMRUNTIME =~ ' '
+            if &sh =~ '\<cmd'
+                let cmd = '""' . $VIMRUNTIME . '\diff"'
+                let eq = '"'
+            else
+                let cmd = substitute($VIMRUNTIME, ' ', '" ', '') . '\diff"'
+            endif
+        else
+            let cmd = $VIMRUNTIME . '\diff'
+        endif
+        silent execute '!' . cmd . ' ' . opt . arg1 . ' ' . arg2 . ' > ' . arg3 . eq
+    endfunction
+endif
+
+" -----------------------------------------------------------------------------
+"  < Linux Gvim/Vim 默认配置> 做了一点修改
+" -----------------------------------------------------------------------------
+if !g:iswindows
+    set hlsearch        "高亮搜索
+    set incsearch       "在输入要搜索的文字时，实时匹配
+
+    " Uncomment the following to have Vim jump to the last position when
+    "
+    " reopening a file
+    if has("autocmd")
+        au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
+        au BufRead * normal zi
+    endif
+
+   if g:isGUI
+       " Source a global configuration file if available
+   else
+        " This line should not be removed as it ensures that various options are
+        " properly set to work with the Vim-related packages available in Debian.
+        runtime! debian.vim
+
+        " Vim5 and later versions support syntax highlighting. Uncommenting the next
+        " line enables syntax highlighting by default.
+
+        " if g:isGUI
+            " set mouse=a                    " 在任何模式下启用鼠标
+        " endif
+        " set ttymouse=xterm
+        set t_Co=256                   " 在终端启用256色
+        set t_ut=
+
+   endif
+endif
+
+
+" =============================================================================
+"                          << 以下为用户自定义配置 >>
+" =============================================================================
+
+" -----------------------------------------------------------------------------
+"  < Vundle 插件管理工具配置 >
+" -----------------------------------------------------------------------------
+" Use Vim settings, rather than Vi settings (much better!).
+" This must be first, because it changes other options as a side effect.
+set nocompatible
+filetype off
+
+if !g:iswindows
+    set rtp+=~/.vim/bundle/Vundle.vim
+    call vundle#begin()
+else
+    set rtp+=$VIM/vimfiles/bundle/vundle.vim/
+    call vundle#begin('$VIM/vimfiles/bundle/')
+endif
+" set the runtime path to include Vundle and initialize
+" alternatively, pass a path where Vundle should install plugins
+"call vundle#begin('~/some/path/here')
+
+" let Vundle manage Vundle, required
+Plugin 'VundleVim/Vundle.vim'
+
+" The following are examples of different formats supported.
+" Keep Plugin commands between vundle#begin/end.
+" plugin on GitHub repo
+Plugin 'tpope/vim-fugitive'
+Plugin 'L9'
+Plugin 'rstacruz/sparkup', {'rtp': 'vim/'}
+" Plugin 'FromtonRouge/OmniCppComplete'
+" Plugin 'Lokaltog/vim-powerline'
+"Plugin 'Shougo/neocomplete.vim'
+"Plugin 'Yggdroot/indentLine'  "low speed for scrolling
+Plugin 'Align'
+Plugin 'Shougo/neocomplcache'
+Plugin 'TxtBrowser'
+Plugin 'ZoomWin'
+Plugin 'a.vim'
+Plugin 'bufexplorer.zip'
+Plugin 'ccvext.vim'
+Plugin 'ctrlp.vim'
+" Plugin 'christoomey/vim-tmux-navigator'
+Plugin 'easymotion/vim-easymotion'
+Plugin 'ervandew/supertab'
+Plugin 'jiangmiao/auto-pairs'
+" Plugin 'justinmk/vim-sneak'
+" not very useful
+" Plugin 'justinmk/vim-dirvish'
+Plugin 'majutsushi/tagbar'
+" Plugin 'minibufexpl.vim'
+Plugin 'ervandew/snipmate.vim'
+" Plugin 'klen/python-mode'
+Plugin 'repeat.vim'
+Plugin 'scrooloose/nerdcommenter'
+" Plugin 'scrooloose/nerdtree'
+Plugin 'scrooloose/syntastic'
+Plugin 'std_c.zip'
+Plugin 'taglist.vim'
+Plugin 'tpope/vim-surround'
+" not very useful
+" Plugin 'tpope/vim-eunuch'
+Plugin 'vim-airline/vim-airline'
+Plugin 'vim-scripts/Mark--Karkat'
+Plugin 'vim-scripts/cSyntaxAfter'
+Plugin 'wesleyche/SrcExpl'
+Plugin 'winmanager'
+" All of your Plugins must be added before the following line
+call vundle#end()            " required
+
+" -----------------------------------------------------------------------------
+"  < 编码配置 >
+" -----------------------------------------------------------------------------
+" 注：使用utf-8格式后，软件与程序源码、文件路径不能有中文，否则报错
+" if g:isGUI
+if has("multi_byte")
+    if &termencoding == ""
+        let &termencoding=&encoding
+    endif
+    " set termencoding=utf-8
+    set encoding=utf-8
+    setglobal fileencoding=utf-8
+    " setglobal bomb
+     " set fileencodings=ucs-bom,utf-8,gb2312,gbk,gb18030
+    set fileencodings=utf-8,gb2312,gbk,gb18030
+endif
+
+" else
+    " set termencoding=utf-8,gb2312,gbk,gb18030
+" endif
+" set fileencoding=utf-8                                "设置当前文件编码
+" set fileencodings=ucs-bom,utf-8,gbk,cp936,latin-1     "设置支持打开的文件的编码
+
+" 文件格式，默认 ffs=dos,unix
+set fileformat=unix                                   "设置新文件的<EOL>格式
+set fileformats=unix,dos,mac                          "给出文件的<EOL>格式类型
+
+if (g:iswindows && g:isGUI)
+    "解决菜单乱码
+    source $VIMRUNTIME/delmenu.vim
+    source $VIMRUNTIME/menu.vim
+
+    "解决consle输出乱码
+    language messages zh_CN.utf-8
+endif
+
+" -----------------------------------------------------------------------------
+"  < 编写文件时的配置 >
+" -----------------------------------------------------------------------------
+" 命令				检测	plugin	indent ~
+" :filetype on			打开	未改变	未改变
+" :filetype off			关闭	未改变	未改变
+" :filetype plugin on		打开	打开	未改变
+" :filetype plugin off		未改变	关闭	未改变
+" :filetype indent on		打开	未改变	打开
+" :filetype indent off		未改变	未改变	关闭
+" :filetype plugin indent on	打开	打开	打开
+" :filetype plugin indent off	未改变	关闭	关闭
+"
+filetype on                                     "启用文件类型侦测
+filetype plugin on                              "针对不同的文件类型加载对应的插件
+filetype plugin indent on                       "启用缩进
+set smartindent                                 "启用智能对齐方式
+set expandtab                                   "将Tab键转换为空格
+set tabstop=4                                   "设置Tab键的宽度
+set shiftwidth=4                                "换行时自动缩进4个空格
+set smarttab                                    "指定按一次backspace就删除shiftwidth宽度的空格
+set foldenable                                  "启用折叠
+set foldmethod=indent                        "indent 折叠方式
+" set foldmethod=manual                           "manual 折叠方式
+"set foldmethod=marker                        "marker 折叠方式
+set backspace=2                " 设置退格键可用
+
+
+" 当文件在外部被修改，自动更新该文件
+set autoread
+
+
+set ignorecase                                        "搜索模式里忽略大小写
+set smartcase                                         "如果搜索模式包含大写字符，不使用 'ignorecase' 选项，只有在输入搜索模式并且打开 'ignorecase' 选项时才会使用
+" set noincsearch                                       "在输入要搜索的文字时，取消实时匹配
+
+set clipboard=unnamed
+
+" -----------------------------------------------------------------------------
+"  < 界面配置 >
+" -----------------------------------------------------------------------------
+if g:isGUI
+    " set cc=80
+    " 个性化状栏（这里提供两种方式，要使用其中一种去掉注释即可，不使用反之）
+    " let &statusline=' %t %{&mod?(&ro?"*":"+"):(&ro?"=":" ")} %1*|%* %{&ft==""?"any":&ft} %1*|%* %{&ff} %1*|%* %{(&fenc=="")?&enc:&fenc}%{(&bomb?",BOM":"")} %1*|%* %=%1*|%* 0x%B %1*|%* (%l,%c%V) %1*|%* %L %1*|%* %P'
+    " set statusline=%t\ %1*%m%*\ %1*%r%*\ %2*%h%*%w%=%l%3*/%L(%p%%)%*,%c%V]\ [%b:0x%B]\ [%{&ft==''?'TEXT':toupper(&ft)},%{toupper(&ff)},%{toupper(&fenc!=''?&fenc:&enc)}%{&bomb?',BOM':''}%{&eol?'':',NOEOL'}]
+
+    " For Win32 GUI: remove 't' flag from 'guioptions': no tearoff menu entries
+    " let &guioptions = substitute(&guioptions, "t", "", "g")
+    " 显示/隐藏菜单栏、工具栏、滚动条，可用 Ctrl + F11 切换
+    set guioptions-=m
+    set guioptions-=T
+    set guioptions-=r
+    set guioptions-=L
+    map <silent> <c-F11> :if &guioptions =~# 'm' <Bar>
+                \set guioptions-=m <Bar>
+                \set guioptions-=T <Bar>
+                \set guioptions-=r <Bar>
+                \set guioptions-=L <Bar>
+                \else <Bar>
+                \set guioptions+=m <Bar>
+                \set guioptions+=T <Bar>
+                \set guioptions+=r <Bar>
+                \set guioptions+=L <Bar>
+                \endif<CR>
+
+
+endif
+
+
+if !g:iswindows
+    set term=screen-256color   " very important can not change10/11/16 
+endif
+
+if has("syntax")
+    syntax on
+endif
+
+" 设置代码配色方案
+if g:isGUI
+    colorscheme Tomorrow-Night-Eighties               "Gvim配色方案
+    " colorscheme molokai
+    " colorscheme solarized
+else
+    colorscheme Tomorrow-Night-Eighties               "终端配色方案
+    " colorscheme molokai
+    " colorscheme solarized
+endif
+
+
+
+set showcmd
+set magic
+set wildmenu
+
+set number                                            "显示行号
+" set relativenumber
+set laststatus=2                                      "启用状态栏信息
+set cmdheight=2                                       "设置命令行的高度为2，默认为1
+set cursorline                                        "突出显示当前行
+set cursorcolumn                                       "突出显示当前行
+if g:iswindows
+    set guifont=Source_Code_Pro:h11
+    " set guifont=YaHei_Consolas_Hybrid:h10                 "设置字体:字号（字体名称空格用下划线代替）
+else
+    if g:isGUI
+        set guifont=BitstreamVeraSansMono\ 10.5
+    endif
+    " set guifont=SourceCodePro\ 11                           "设置字体:字号（字体名称空格用下划线代替）
+endif
+
+set nowrap                                            "设置不自动换行
+set shortmess=atI                                     "去掉欢迎界面
+" au GUIEnter * simalt ~x                              "窗口启动时自动最大化
+
+winpos 1250 0                                         "指定窗口出现的位置，坐标原点在屏幕左上角
+set lines=80 columns=100                              "指定窗口大小，lines为高度，columns为宽度
+" set lines=500 columns=500                              "指定窗口大小，lines为高度，columns为宽度
+
+" -----------------------------------------------------------------------------
+"  < 其它配置 >
+" -----------------------------------------------------------------------------
+set history=50		" keep 50 lines of command line history
+
+set writebackup                             "保存文件前建立备份，保存成功后删除该备份
+set nobackup                                "设置无备份文件
+" set noswapfile                              "设置无临时文件
+set vb t_vb=                                "关闭提示音
+
+" -----------------------------------------------------------------------------
+"  < Key Mapping >
+" -----------------------------------------------------------------------------
+"  Leader ---------------------------------------------------------
+" cancel all insert mode space map
+let mapleader = ";"
+" map <Space> <Leader>
+" let mapleader = "\<Space>"
+map <Space> <Plug>(easymotion-prefix)
+
+" <Leader>f{char} to move to {char}
+" map  <Leader>f <Plug>(easymotion-bd-f)
+" nmap <Leader>f <Plug>(easymotion-overwin-f)
+map  f <Plug>(easymotion-bd-f)
+nmap f <Plug>(easymotion-overwin-f)
+
+" s{char}{char} to move to {char}{char}
+nmap s <Plug>(easymotion-overwin-f2)
+
+" Move to line
+map <Leader>j <Plug>(easymotion-bd-jk)
+nmap <Leader>j <Plug>(easymotion-overwin-line)
+
+" Move to word
+map  <Leader>k <Plug>(easymotion-bd-w)
+nmap <Leader>k <Plug>(easymotion-overwin-w)
+
+" Gif config
+map  / <Plug>(easymotion-sn)
+omap / <Plug>(easymotion-tn)
+
+" These `n` & `N` mappings are options. You do not have to map `n` & `N` to EasyMotion.
+" Without these mappings, `n` & `N` works fine. (These mappings just provide
+" different highlight method and have some other features )
+map  n <Plug>(easymotion-next)
+map  N <Plug>(easymotion-prev)
+
+let g:EasyMotion_smartcase = 1
+
+
+nnoremap <Leader>; A;<Esc>
+
+" "B 
+" nnoremap <Leader>b :update<CR>:!make<CR>
+" "E 
+if findfile("Makefile") == "Makefile"
+    map <Leader>e :update<CR>:!make<CR>
+else
+    map <Leader>e :update<CR>:!./%<CR>
+endif
+" nnoremap <Leader>e :update<CR>:!make<CR>
+
+" "G 
+nnoremap <Leader>g :vimgrep // *.*<left><left><left><left><left>
+
+" window
+" "H 
+" nnoremap <Leader>h <C-w>h
+" "I 
+" nnoremap <Leader>j <C-w>j
+" "J 
+" nnoremap <Leader>k <C-w>k
+" "K 
+ " nnoremap <Leader>l <C-w>l
+
+" "Q
+nnoremap <Leader>q <Esc>:q<CR>
+
+" "R
+" "conflict with Mark--Karkat <Leader> m n r *
+" below add in .vim/after/unmap.vim
+" unmap <Leader>r
+" nnoremap <Leader>r :!./out<CR>
+" /
+
+
+" "S
+" nnoremap <Leader>s :update<CR>
+nnoremap <Leader>ss :%s/\s\+$//ge<cr>:nohl<cr>
+
+" "T
+" nnoremap <Leader>t :update<CR>:!./%<CR>
+" "W
+nnoremap <Leader>w <Esc>:w<CR>
+" "X
+nnoremap <Leader>x :xa<CR>
+
+"  Leader normal key ---------------------------------------------------------
+" Don't use Ex mode, use Q for formatting
+" map Q gq
+" "; 
+" jj or jk 插入模式下go to normal mode
+inoremap jj <Esc>
+
+"    
+"  "vim-sneak is better than easymotion 10/10/16 
+"  "replace 'f' with 1-char Sneak
+"  nmap f <Plug>Sneak_f
+"  nmap F <Plug>Sneak_F
+"  xmap f <Plug>Sneak_f
+"  xmap F <Plug>Sneak_F
+"  omap f <Plug>Sneak_f
+"  omap F <Plug>Sneak_F
+"  "replace 't' with 1-char Sneak
+"  nmap t <Plug>Sneak_t
+"  nmap T <Plug>Sneak_T
+"  xmap t <Plug>Sneak_t
+"  xmap T <Plug>Sneak_T
+"  omap t <Plug>Sneak_t
+"  omap T <Plug>Sneak_T
+"  
+"  let g:sneak#streak = 1
+"  let g:sneak#use_ic_scs = 1
+
+map Y y$
+
+
+
+
+"  function key ---------------------------------------------------------
+" F2
+" for NerdTree
+" F3
+" for xxx
+nnoremap <F9> :SyntasticToggleMode<CR>
+" F4 compile
+nnoremap <F4> :update<CR>:!make<CR>
+inoremap <F4> <Esc>:update<CR>:!make<CR>
+" F5 run previous command
+nnoremap <F5> :!./out<CR>
+inoremap <F5> <Esc>:!./out<CR>
+
+nnoremap <F6> :update<CR>:!./%<CR>
+inoremap <F6> <Esc>:update<CR>:!./%<CR>
+
+inoremap <F7> [I:let nr = input("Which one: ")<Bar>exe "normal " . nr ."[\t"<CR>
+nnoremap <F7> <Esc>[I:let nr = input("Which one: ")<Bar>exe "normal " . nr ."[\t"<CR>
+
+nnoremap <F11> :call libcallnr("gvimfullscreen.dll", "ToggleFullScreen", 0)<CR>
+inoremap <F11> <Esc>:call libcallnr("gvimfullscreen.dll", "ToggleFullScreen", 0)<CR>
+
+"  CTRL keys ---------------------------------------------------------
+" 至行首
+cnoremap <C-A>		<Home>
+" 后退一个字符
+cnoremap <C-B>		<Left>
+" 删除光标所在的字符
+cnoremap <C-D>		<Del>
+" 至行尾
+cnoremap <C-E>		<End>
+" 前进一个字符
+cnoremap <C-F>		<Right>
+" 取回较新的命令行
+cnoremap <C-N>		<Down>
+" 取回以前 (较旧的) 命令行
+cnoremap <C-P>		<Up>
+" 后退一个单词
+"cnoremap <A-b>	<S-Left>
+" 前进一个单词
+"cnoremap <A-F>	<S-Right>
+"
+"
+"  shift keys ---------------------------------------------------------
+" in konsole it is used to shift termianl tabs
+" map <S-Left> :tabp<CR>
+" map <S-Right> :tabn<CR>
+"
+" below is new
+"
+"  Alt keys ---------------------------------------------------------
+" redhat terminal sucks
+if !  g:isGUI
+    let c='a'
+    while c <= 'z'
+        exec "set <A-".c.">=\e".c
+        exec "imap \e".c." <A-".c.">"
+        let c = nr2char(1+char2nr(c))
+    endw
+
+    let C='A'
+    while C <= 'Z'
+        exec "set <A-".C.">=\e".C
+        exec "imap \e".C." <A-".C.">"
+        let C = nr2char(1+char2nr(C))
+    endw
+    
+    set timeout ttimeoutlen=50
+endif
+" " " A-a
+map <A-a> <Plug>NERDCommenterToggle
+" 
+" " " A-B
+nnoremap <A-b> :update<CR>:!make<CR>
+nnoremap <A-B> :update<CR>:!make<CR>
+" 
+" " " A-C
+" " copy to clipboard
+" inoremap <A-c> <Esc>"+yy
+" nnoremap <A-c> <Esc>"+yy
+" vnoremap <A-c> "+y
+" inoremap <A-C> <Esc>"+yy
+" nnoremap <A-C> <Esc>"+yy
+" vnoremap <A-C> "+y
+" 
+" " " A-D
+ " sublime ctrl+shift+k
+ nnoremap <A-d> dd
+ nnoremap <A-D> ddk
+ inoremap <A-d> <C-O>dd
+ inoremap <A-D> <C-O>ddk
+ vnoremap <A-d> d
+ vnoremap <A-D> dk
+" 
+" " " A-E
+"auto-pair occupy 
+" " " A-F
+" 
+" " " A-G
+" 
+" " A-H
+inoremap <A-h> <Left>
+"nnoremap <A-h> 
+
+" " A-J
+"inoremap <A-j> <Down>
+"nnoremap <A-j> ddp
+"vnoremap <A-j> <Esc>`>jdd`<Pgv
+"vnoremap <A-J> <Esc>`>jdd`<Pgv
+nnoremap <A-j> o<Esc>k
+inoremap <A-j> <Esc>o
+
+" " A-K
+nnoremap <A-k> O<Esc>
+inoremap <A-k> <Esc>O
+"inoremap <A-k> <Up>
+"nnoremap <A-k> kddpk
+"vnoremap <A-k> <Esc>`<kdd`>pgv
+"vnoremap <A-K> ykddgv<Esc>pgv
+ 
+ " " A-L
+"inoremap <A-l> <Right>
+ "nnoremap <A-l> 
+inoremap <silent> <A-l> <Esc>:call AutoPairsJump()<CR>a
+" 
+" " " A-M
+" " sublime ctrl+l
+" nnoremap <A-m> V
+" nnoremap <A-M> V
+" vnoremap <A-m> j
+" vnoremap <A-M> k
+" 
+" " " A-N
+"  Autopair occupy
+" 
+" " " A-O
+" tmux occupy
+"nnoremap <A-m> o<Esc>k
+"nnoremap <A-M> O<Esc>
+"inoremap <A-m> <Esc>o
+"inoremap <A-M> <Esc>O
+"
+ " " A-P
+" autopair plugin occupy 
+
+" " " A-Q
+" map <A-q> <Esc>:q<CR>
+nnoremap <A-q> :q<CR>
+inoremap <A-q> <Esc>:q<CR>
+vnoremap <A-q> <Esc>:q<CR>
+nnoremap <A-Q> :q<CR>
+inoremap <A-Q> <Esc>:q<CR>
+vnoremap <A-Q> <Esc>:q<CR>
+
+" " A-S
+" map <A-s> <Esc>:update<CR>
+nnoremap <A-s> :update<CR>
+inoremap <A-s> <Esc>:update<CR>
+vnoremap <A-s> <Esc>:update<CR>
+nnoremap <A-S> :update<CR>
+inoremap <A-S> <Esc>:update<CR>
+vnoremap <A-S> <Esc>:update<CR>
+" 
+" " " A-T
+map <A-T> :!./out<CR>
+map <A-t> :!./out<CR>
+" 
+" " " A-U
+" inoremap <A-u> <Esc>ui
+" inoremap <A-U> <Esc>ui
+" 
+" " " A-V
+  " paste from clipboard
+" inoremap <A-v> <Esc>"+p
+" nnoremap <A-v> <Esc>"+p
+" vnoremap <A-v> "+p
+" inoremap <A-V> <Esc>"+p
+" nnoremap <A-V> <Esc>"+p
+" vnoremap <A-V> "+p
+" 
+" " " A-W
+" 
+" " " A-X
+" noremap <A-x> i<space><Esc>
+" 
+" " " A-Y
+" " sublime ctrl+shift+d
+ nnoremap <A-y> yyp
+ nnoremap <A-Y> yyP
+ vnoremap <A-y> y`>p
+ vnoremap <A-Y> y`<P
+ inoremap <A-y> <C-O>yyp
+ inoremap <A-Y> <C-O>yyP
+" 
+" " " A-Z
+
+
+"
+" func Eatchar(pat)
+    " let c = nr2char(getchar(0))
+    " return (c =~ a:pat) ? '' : c
+" endfunc
+" iab xdate <c-r>=strftime("%d/%m/%y %H:%M:%S")<cr>
+iab xdate <c-r>=strftime("%m/%d/%y")<cr>
+iab endl << endl
+iab cout cout <<
+iab cin cin >>
+iab #i #include
+" -----------------------------------------------------------------------------
+"  < tmux setting >
+" -----------------------------------------------------------------------------
+if exists('$TMUX')
+    function! TmuxOrSplitSwitch(wincmd, tmuxdir)
+        let previous_winnr = winnr()
+        silent! execute "wincmd " . a:wincmd
+        if previous_winnr == winnr()
+            call system("tmux select-pane -" . a:tmuxdir)
+            redraw!
+        endif
+    endfunction
+
+    let previous_title = substitute(system("tmux display-message -p '#{pane_title}'"), '\n', '', '')
+    let &t_ti = "\<Esc>]2;vim\<Esc>\\" . &t_ti
+    let &t_te = "\<Esc>]2;". previous_title . "\<Esc>\\" . &t_te
+    " for cursor sharp
+
+    nnoremap <silent> <C-h> :call TmuxOrSplitSwitch('h', 'L')<cr>
+    nnoremap <silent> <C-j> :call TmuxOrSplitSwitch('j', 'D')<cr>
+    nnoremap <silent> <C-k> :call TmuxOrSplitSwitch('k', 'U')<cr>
+    nnoremap <silent> <C-l> :call TmuxOrSplitSwitch('l', 'R')<cr>
+else
+
+    map <C-h> <C-w>h
+    map <C-j> <C-w>j
+    map <C-k> <C-w>k
+    map <C-l> <C-w>l
+endif
+
+
+
+" =============================================================================
+"                          << 以下为常用插件配置 >>
+" =============================================================================
+
+" -----------------------------------------------------------------------------
+"  < a.vim 插件配置 >
+" -----------------------------------------------------------------------------
+" 用于切换C/C++头文件
+" :A     ---切换头文件并独占整个窗口
+" :AV    ---切换头文件并垂直分割窗口
+" :AS    ---切换头文件并水平分割窗口
+
+" -----------------------------------------------------------------------------
+"  < Align 插件配置 >
+" -----------------------------------------------------------------------------
+" 一个对齐的插件，用来——排版与对齐代码，功能强大，不过用到的机会不多
+
+" -----------------------------------------------------------------------------
+"  < auto-pairs 插件配置 >
+" -----------------------------------------------------------------------------
+" 用于括号与引号自动补全，不过会与函数原型提示插件echofunc冲突
+" 所以我就没有加入echofunc插件
+
+" let g:AutoPairsShortcutJump = '<Tab>'
+" -----------------------------------------------------------------------------
+"  < BufExplorer 插件配置 >
+" -----------------------------------------------------------------------------
+" 快速轻松的在缓存中切换（相当于另一种多个文件间的切换方式）
+" <Leader>be 在当前窗口显示缓存列表并打开选定文件
+" <Leader>bs 水平分割窗口显示缓存列表，并在缓存列表窗口中打开选定文件
+" <Leader>bv 垂直分割窗口显示缓存列表，并在缓存列表窗口中打开选定文件
+
+" -----------------------------------------------------------------------------
+"  < ctrlp 插件配置 >
+" -----------------------------------------------------------------------------
+let g:ctrlp_working_path_mode = 's'
+
+
+" -----------------------------------------------------------------------------
+"  < ccvext.vim 插件配置 >
+" -----------------------------------------------------------------------------
+" 用于对指定文件自动生成tags与cscope文件并连接
+" 如果是Windows系统, 则生成的文件在源文件所在盘符根目录的.symbs目录下(如: X:\.symbs\)
+" 如果是Linux系统, 则生成的文件在~/.symbs/目录下
+" 具体用法可参考www.vim.org中此插件的说明
+" <Leader>sy 自动生成tags与cscope文件并连接
+" <Leader>sc 连接已存在的tags与cscope文件
+
+" -----------------------------------------------------------------------------
+"  < cSyntaxAfter 插件配置 >
+" -----------------------------------------------------------------------------
+" 高亮括号与运算符等
+au! BufRead,BufNewFile,BufEnter *.{c,cpp,h,javascript} call CSyntaxAfter()
+
+" -----------------------------------------------------------------------------
+"  < indentLine 插件配置 >
+" -----------------------------------------------------------------------------
+" 用于显示对齐线，与 indent_guides 在显示方式上不同，根据自己喜好选择了
+" 在终端上会有屏幕刷新的问题，这个问题能解决有更好了
+" 开启/关闭对齐线
+"nmap <leader>il :IndentLinesToggle<CR>
+
+" 设置Gvim的对齐线样式
+"if g:isGUI
+"    let g:indentLine_char = "┊"
+"    let g:indentLine_first_char = "┊"
+"endif
+
+" 设置终端对齐线颜色
+" let g:indentLine_color_term = 239
+"
+" 设置 GUI 对齐线颜色
+" let g:indentLine_color_gui = '#A4E57E'
+
+" -----------------------------------------------------------------------------
+"  < Mark--Karkat（也就是 Mark） 插件配置 >
+" -----------------------------------------------------------------------------
+" 给不同的单词高亮，表明不同的变量时很有用，详细帮助见 :h mark.txt
+
+" " -----------------------------------------------------------------------------
+" "  < MiniBufExplorer 插件配置 >
+" " -----------------------------------------------------------------------------
+" " 快速浏览和操作Buffer
+" " 主要用于同时打开多个文件并相与切换
+
+" let g:miniBufExplMapWindowNavArrows = 1     "用Ctrl加方向键切换到上下左右的窗口中去
+" let g:miniBufExplMapWindowNavVim = 1        "用<C-k,j,h,l>切换到上下左右的窗口中去
+" let g:miniBufExplMapCTabSwitchBufs = 1      "功能增强（不过好像只有在Windows中才有用）
+" "                                            <C-Tab> 向前循环切换到每个buffer上,并在但前窗口打开
+" "                                            <C-S-Tab> 向后循环切换到每个buffer上,并在当前窗口打开
+
+" 在不使用 MiniBufExplorer 插件时也可用<C-k,j,h,l>切换到上下左右的窗口中去
+
+" -----------------------------------------------------------------------------
+"  < neocomplcache 插件配置 >
+" -----------------------------------------------------------------------------
+" 关键字补全、文件路径补全、tag补全等等，各种，非常好用，速度超快。
+let g:neocomplcache_enable_at_startup = 1     "vim 启动时启用插件
+let g:neocomplcache_disable_auto_complete = 1 "不自动弹出补全列表
+" 在弹出补全列表后用 <c-p> 或 <c-n> 进行上下选择效果比较好
+
+" -----------------------------------------------------------------------------
+"  < nerdcommenter 插件配置 >
+" -----------------------------------------------------------------------------
+" 我主要用于C/C++代码注释(其它的也行)，这个插件我做了小点修改，也就是在注释符
+" 与注释内容间加一个空格
+" 以下为插件默认快捷键，其中的说明是以C/C++为例的
+" <Leader>ci 以每行一个 /* */ 注释选中行(选中区域所在行)，再输入则取消注释
+" <Leader>cm 以一个 /* */ 注释选中行(选中区域所在行)，再输入则称重复注释
+" <Leader>cc 以每行一个 /* */ 注释选中行或区域，再输入则称重复注释
+" <Leader>cu 取消选中区域(行)的注释，选中区域(行)内至少有一个 /* */
+" <Leader>ca 在/*...*/与//这两种注释方式中切换（其它语言可能不一样了）
+" <Leader>cA 行尾注释
+let NERDSpaceDelims = 1                     "在左注释符之后，右注释符之前留有空格
+
+" -----------------------------------------------------------------------------
+"  < nerdtree 插件配置 >
+" -----------------------------------------------------------------------------
+" 有目录村结构的文件浏览插件
+
+" 常规模式下输入 F2 调用插件
+" nnoremap <F2> :NERDTreeToggle<CR>
+" inoremap <F2> <Esc>:NERDTreeToggle<CR>
+
+" -----------------------------------------------------------------------------
+"  <vim-easymotion插件配置 >
+" -----------------------------------------------------------------------------
+
+" -----------------------------------------------------------------------------
+"  < omnicppcomplete 插件配置 >
+" -----------------------------------------------------------------------------
+" 用于C/C++代码补全，这种补全主要针对命名空间、类、结构、共同体等进行补全，详细
+" 说明可以参考帮助或网络教程等
+" 使用前先执行如下 ctags 命令（本配置中可以直接使用 ccvext 插件来执行以下命令）
+" ctags -R --c++-kinds=+p --fields=+iaS --extra=+q
+" 我使用上面的参数生成标签后，对函数使用跳转时会出现多个选择
+" 所以我就将--c++-kinds=+p参数给去掉了，如果大侠有什么其它解决方法希望不要保留呀
+" set completeopt=menu                        "关闭预览窗口
+
+
+" -----------------------------------------------------------------------------
+"  < powerline 插件配置 >
+" -----------------------------------------------------------------------------
+" 状态栏插件，更好的状态栏效果
+
+" -----------------------------------------------------------------------------
+"  < repeat 插件配置 >
+" -----------------------------------------------------------------------------
+" 主要用"."命令来重复上次插件使用的命令
+
+" -----------------------------------------------------------------------------
+"  < snipMate 插件配置 >
+" -----------------------------------------------------------------------------
+" 用于各种代码补全，这种补全是一种对代码中的词与代码块的缩写补全，详细用法可以参
+" 考使用说明或网络教程等。不过有时候也会与 supertab 插件在补全时产生冲突，如果大
+" 侠有什么其它解决方法希望不要保留呀
+
+" -----------------------------------------------------------------------------
+"  < SrcExpl 插件配置 >
+" -----------------------------------------------------------------------------
+" 增强源代码浏览，其功能就像Windows中的"Source Insight"
+" :SrcExpl                                   "打开浏览窗口
+" :SrcExplClose                              "关闭浏览窗口
+" :SrcExplToggle                             "打开/闭浏览窗口
+
+" " -----------------------------------------------------------------------------
+" "  < supertab 插件配置 >
+" " -----------------------------------------------------------------------------
+" " 我主要用于配合 omnicppcomplete 插件，在按 Tab 键时自动补全效果更好更快
+" let g:SuperTabNoCompleteBefore = [];
+ let g:SuperTabNoCompleteAfter = ['^','\s']
+
+let g:SuperTabDefaultCompletionType = "context"
+let g:SuperTabContextDefaultCompletionType = "<c-p>"
+let g:SuperTabCompletionContexts = ['s:ContextText', 's:ContextDiscover']
+let g:SuperTabContextDiscoverDiscovery = ["&completefunc:<c-p>", "&omnifunc:<c-x><c-o>"]
+" Problem with load order (vimrc is evaluated before latex-box setting of omnifunc)
+" \ verbose set omnifunc? | " is empty
+" added this autocommand to after/ftplugin/tex.vim
+" :do FileType solves also the problem
+" autocmd FileType * 
+      " \ if &omnifunc != '' |
+      " \ call SuperTabChain(&omnifunc, "<c-p>") |
+      " \ call SuperTabSetDefaultCompletionType("<c-x><c-u>") |
+      " \ endif
+
+" -----------------------------------------------------------------------------
+"  < std_c 插件配置 >
+" -----------------------------------------------------------------------------
+" 用于增强C语法高亮
+
+" 启用 // 注视风格
+let c_cpp_comments = 0
+
+" -----------------------------------------------------------------------------
+"  < surround 插件配置 >
+" -----------------------------------------------------------------------------
+" 快速给单词/句子两边增加符号（包括html标签），缺点是不能用"."来重复命令
+" 不过 repeat 插件可以解决这个问题，详细帮助见 :h surround.txt
+
+" -----------------------------------------------------------------------------
+"  < Syntastic 插件配置 >
+" -----------------------------------------------------------------------------
+" 用于保存文件是查检语法
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_jump = 1
+let g:syntastic_auto_loc_list = 1       "default is 0
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 0
+let g:syntastic_cpp_compiler = 'g++5.3'
+let g:syntastic_cpp_compiler_options = ' -std=c++11 '
+
+" no pylint for syntax check
+let g:syntastic_mode_map = {
+    \ "mode": "active",
+    \ "active_filetypes": [],
+    \ "passive_filetypes": ["python"] }
+" no +python compile for vim, so can not use pymode also
+" let g:pymode_lint_on_write = 0
+
+let g:syntastic_enable_perl_checker = 1
+let g:syntastic_perl_checkers=['perl', 'perlcritic', 'podchecker']
+" -----------------------------------------------------------------------------
+"  < Tagbar 插件配置 >
+" -----------------------------------------------------------------------------
+" 相对 TagList 能更好的支持面向对象
+
+" 常规模式下输入 tb 调用插件，如果有打开 TagList 窗口则先将其关闭
+nnoremap tb :TlistClose<cr>:TagbarToggle<cr>
+
+let g:tagbar_width=30                       "设置窗口宽度
+" let g:tagbar_left=1                         "在左侧窗口中显示
+
+" -----------------------------------------------------------------------------
+"  < TagList 插件配置 >
+" -----------------------------------------------------------------------------
+" 高效地浏览源码, 其功能就像vc中的workpace
+" 那里面列出了当前文件中的所有宏,全局变量, 函数名等
+
+" 常规模式下输入 tl 调用插件，如果有打开 Tagbar 窗口则先将其关闭
+nnoremap tl :TagbarClose<cr>:Tlist<cr>
+
+let Tlist_Show_One_File=1                   "只显示当前文件的tags
+" let Tlist_Enable_Fold_Column=0              "使taglist插件不显示左边的折叠行
+let Tlist_Exit_OnlyWindow=1                 "如果Taglist窗口是最后一个窗口则退出Vim
+let Tlist_File_Fold_Auto_Close=1            "自动折叠
+let Tlist_WinWidth=30                       "设置窗口宽度
+let Tlist_Use_Right_Window=1                "在右侧窗口中显示
+
+" -----------------------------------------------------------------------------
+"  < txtbrowser 插件配置 >
+" -----------------------------------------------------------------------------
+" 用于文本文件生成标签与与语法高亮（调用TagList插件生成标签，如果可以）
+au BufRead,BufNewFile *.txt setlocal ft=txt
+
+" " -----------------------------------------------------------------------------
+" "  < WinManager 插件配置 >
+" " -----------------------------------------------------------------------------
+" " 管理各个窗口, 或者说整合各个窗口
+
+" " 常规模式下输入 F3 调用插件
+nnoremap <F3> :WMToggle<cr>
+inoremap <F3> <Esc>:WMToggle<cr>
+
+" " 这里可以设置为多个窗口, 如'FileExplorer|TagList'
+" let g:winManagerWindowLayout='FileExplorer'
+
+" let g:persistentBehaviour=0                 "只剩一个窗口时, 退出vim
+" let g:winManagerWidth=30                    "设置窗口宽度
+
+" -----------------------------------------------------------------------------
+"  < ZoomWin 插件配置 >
+" -----------------------------------------------------------------------------
+" 用于分割窗口的最大化与还原
+" 快捷键 <c-w>o 在最大化与还原间切换
+
+" =============================================================================
+"                          << 以下为常用工具配置 >>
+" =============================================================================
+
+" -----------------------------------------------------------------------------
+"  < cscope 工具配置 >
+" -----------------------------------------------------------------------------
+" 用Cscope自己的话说 - "你可以把它当做是超过频的ctags"
+if has("cscope")
+    "设定可以使用 quickfix 窗口来查看 cscope 结果
+    set cscopequickfix=s-,c-,d-,i-,t-,e-
+    "使支持用 Ctrl+]  和 Ctrl+t 快捷键在代码间跳转
+    set cscopetag
+    "如果你想反向搜索顺序设置为1
+    set csto=0
+    "在当前目录中添加任何数据库
+    if filereadable("cscope.out")
+        cs add cscope.out
+        "否则添加数据库环境中所指出的
+    elseif $CSCOPE_DB != ""
+        cs add $CSCOPE_DB
+    endif
+    set cscopeverbose
+    "快捷键设置
+    nmap <C-\>s :cs find s <C-R>=expand("<cword>")<CR><CR>
+    nmap <C-\>g :cs find g <C-R>=expand("<cword>")<CR><CR>
+    nmap <C-\>c :cs find c <C-R>=expand("<cword>")<CR><CR>
+    nmap <C-\>t :cs find t <C-R>=expand("<cword>")<CR><CR>
+    nmap <C-\>e :cs find e <C-R>=expand("<cword>")<CR><CR>
+    nmap <C-\>f :cs find f <C-R>=expand("<cfile>")<CR><CR>
+    nmap <C-\>i :cs find i ^<C-R>=expand("<cfile>")<CR>$<CR>
+    nmap <C-\>d :cs find d <C-R>=expand("<cword>")<CR><CR>
+endif
+
+" -----------------------------------------------------------------------------
+"  < ctags 工具配置 >
+" -----------------------------------------------------------------------------
+" 对浏览代码非常的方便,可以在函数,变量之间跳转等
+set tags=./tags;                            "向上级目录递归查找tags文件（好像只有在Windows下才有用）
+
+" -----------------------------------------------------------------------------
+"  < gvimfullscreen 工具配置 > 请确保已安装了工具
+" -----------------------------------------------------------------------------
+" 用于 Windows Gvim 全屏窗口，可用 F11 切换
+" 全屏后再隐藏菜单栏、工具栏、滚动条效果更好
+if (g:iswindows && g:isGUI)
+    map <F11> <Esc>:call libcallnr("gvimfullscreen.dll", "ToggleFullScreen", 0)<CR>
+endif
+
+" =============================================================================
+"                          << 以下为常用自动命令配置 >>
+" =============================================================================
+
+" 自动切换目录为当前编辑文件所在目录
+" if g:isGUI
+    au BufRead,BufNewFile,BufEnter * cd %:p:h
+" endif
+
+" =============================================================================
+"                          << 其它 >>
+" =============================================================================
+
+" 注：上面配置中的"<Leader>"在本软件中设置为"\"键（引号里的反斜杠），如<Leader>t
+" 指在常规模式下按"\"键加"t"键，这里不是同时按，而是先按"\"键后按"t"键，间隔在一
+ " 秒内，而<Leader>cs是先按"\"键再按"c"又再按"s"键
