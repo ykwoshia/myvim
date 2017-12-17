@@ -14,6 +14,10 @@ else
     let g:isGUI = 0
 endif
 " }}}2
+" < Distro > {{{2
+" let g:distro = 'ubuntu'
+" let g:distro = 'others'
+" }}}2
 " }}}1
 "                       << Default Configuration >> {{{1
 
@@ -221,6 +225,9 @@ else
     set lines=80 columns=100
 endif
 
+if executable('goldendict')
+    set keywordprg=goldendict
+endif 
 " }}}2
 "  < Encoding Options > {{{2
 
@@ -935,33 +942,6 @@ Plug 'matze/vim-move'
 
 
 " }}}1
-"  < vim-stardict > {{{1
-Plug 'phongvcao/vim-stardict'
-    " Make vim-stardict split open in a :split (default value)
-    let g:stardict_split_horizontal = 1
-
-    " Set vim-stardict split width (or height) to 20 based on whether
-    " vim-stardict split is a :vsplit (or :split)
-	let g:stardict_split_size = 20
-
-	" Map vim-stardict's commands
-	" Ready for typing the word in
-    nnoremap <leader>sw :StarDict<Space>
-	" Lookup the word under cursor
-	nnoremap <leader>sc :StarDictCursor<CR>
-
-	" OPTIONAL: You can change the colors of output of vim-stardict inside
-	" Vim as follow (see below for the comprehensive list of highlight
-	" group):
-	" highlight link stardictResult Special              " Default value
-	" highlight link stardictWord PreProc                " Default value
-	" highlight link stardictWordType Statement          " Default value
-	" highlight link stardictWordMeaning Identifier      " Default value
-	" highlight link stardictWordExample Type            " Default value
-	" highlight link stardictDictName Underlined         " Default value
-" }}}1
-"  < supertab > {{{1
-
 Plug 'ervandew/supertab'
 " let g:SuperTabNoCompleteBefore = [];
 let g:SuperTabNoCompleteAfter = ['^','\s']
