@@ -131,9 +131,9 @@ au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g
 " auto change dir to current file but conflict with fugitive
 " au BufRead,BufNewFile,BufEnter * cd %:p:h
 
-" au InsertEnter * silent execute "!gconftool-2 --type string --set /apps/gnome-terminal/profiles/Default/cursor_shape ibeam"
-" au InsertLeave * silent execute "!gconftool-2 --type string --set /apps/gnome-terminal/profiles/Default/cursor_shape block"
-" au VimLeave * silent execute "!gconftool-2 --type string --set /apps/gnome-terminal/profiles/Default/cursor_shape ibeam"
+au InsertEnter,VimLeave * silent execute "!gconftool-2 --type string --set /apps/gnome-terminal/profiles/Default/cursor_shape ibeam"
+au InsertLeave,VimEnter * silent execute "!gconftool-2 --type string --set /apps/gnome-terminal/profiles/Default/cursor_shape block"
+
 if has("autocmd")
     au VimEnter,InsertLeave * silent execute '!echo -ne "\e[2 q"' | redraw!
     au InsertEnter,InsertChange *
@@ -209,11 +209,13 @@ set wildmenu
 " set colorcolumn=80
 
 set number
-" set relativenumber
+set relativenumber
 set laststatus=2
 set cmdheight=2
 set cursorline
 set cursorcolumn
+set splitbelow
+set splitright
 
 set nowrap
 set shortmess=atI
