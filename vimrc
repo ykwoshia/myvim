@@ -369,6 +369,8 @@ nnoremap <Leader>' ''
 " inoremap <Leader>; <Esc>A;<Esc>
 
 nnoremap <Space>; q:k
+nnoremap <Space>] m`:silent +g/\m^\s*$/d<CR>``:noh<CR>
+nnoremap <Space>[ m`:silent -g/\m^\s*$/d<CR>``:noh<CR>
 " "A;
 
 
@@ -427,7 +429,7 @@ nnoremap <Leader>sl :redraw!<CR>
 nnoremap <Leader>so :source $MYVIMRC<CR>:AirlineRefresh<CR>
 
 " "T
-" nnoremap <Leader>t :update<CR>:!./%<CR>
+nnoremap <Space>t :NERDTreeToggle<CR>
 " V
 nnoremap <Space>v :e ~/.vimrc<CR>
 " "W
@@ -815,6 +817,10 @@ nnoremap <space>g+ :Silent Git stash pop<CR>:e<CR>
 " }}}1
 "  < unimpaired.vim > {{{1
 Plug 'tpope/vim-unimpaired'
+" }}}1
+"  < junegunn/gv.vim > {{{1
+Plug 'junegunn/gv.vim'
+" }}}1
 " < L9 > {{{1
 Plug 'vim-scripts/L9'
 " }}}1
@@ -933,6 +939,10 @@ let g:ctrlp_working_path_mode = 's'
 "  < vim-auto-save > {{{1
 
 Plug '907th/vim-auto-save'
+set updatetime=2000
+let g:auto_save=1
+let g:auto_save_silent=1
+let g:auto_save_events = ["CursorHold"]
 
 
 " }}}1
@@ -1081,7 +1091,7 @@ Plug 'tpope/vim-repeat'
 Plug 'scrooloose/nerdcommenter'
 let NERDSpaceDelims = 1
 
-" Plug 'scrooloose/nerdtree'
+Plug 'scrooloose/nerdtree'
 
 
 " }}}1
