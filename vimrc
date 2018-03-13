@@ -830,8 +830,8 @@ Plug 'vim-scripts/L9'
 Plug 'junegunn/vim-easy-align'
 " }}}1
 "  < fzf > {{{1
-Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all'  }
-Plug 'junegunn/fzf.vim'
+" Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all'  }
+" Plug 'junegunn/fzf.vim'
 " }}}1
 "  < vim-expand-region > {{{1
 
