@@ -349,6 +349,7 @@ iab xdate <c-r>=strftime("%m/%d/%y")<cr>
 iab cout cout <<
 iab cin cin >>
 iab #i #include
+iab teh the
 
 
 " }}}1
@@ -452,6 +453,7 @@ inoremap jj <Esc>
 inoremap jk <Right>
 " , always followed by a space
 inoremap , ,<Space>
+inoremap . .<Space>
 nnoremap <BS> <C-^>
 
 map Y y$
