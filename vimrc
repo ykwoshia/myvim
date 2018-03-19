@@ -401,8 +401,8 @@ endif
 " nnoremap <Leader>e :update<CR>:!make<CR>
 
 " "G
-nnoremap <Leader>g :vimgrep // *.*<left><left><left><left><left>
-
+" nnoremap <Leader>g :vimgrep // *.*<left><left><left><left><left>
+" nnoremap <leader>g :silent execute "grep! -R " . shellescape(expand("<cWORD>")) . " ."<cr> :copen<cr>
 " " window
 " "H
 nnoremap <Leader>h <C-w>h
@@ -818,6 +818,9 @@ nnoremap <space>g- :Silent Git stash<CR>:e<CR>
 nnoremap <space>g+ :Silent Git stash pop<CR>:e<CR>
 
 
+" }}}1
+"  < vim-grep-operator > {{{1
+Plug 'ykwoshia/vim-grep-operator'
 " }}}1
 "  < unimpaired.vim > {{{1
 Plug 'tpope/vim-unimpaired'
