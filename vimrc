@@ -131,8 +131,8 @@ au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g
 " auto change dir to current file but conflict with fugitive
 " au BufRead,BufNewFile,BufEnter * cd %:p:h
 
-au InsertEnter,VimLeave * silent execute "!gconftool-2 --type string --set /apps/gnome-terminal/profiles/Default/cursor_shape ibeam"
-au InsertLeave,VimEnter * silent execute "!gconftool-2 --type string --set /apps/gnome-terminal/profiles/Default/cursor_shape block"
+" au InsertEnter,VimLeave * silent execute "!gconftool-2 --type string --set /apps/gnome-terminal/profiles/Default/cursor_shape ibeam"
+" au InsertLeave,VimEnter * silent execute "!gconftool-2 --type string --set /apps/gnome-terminal/profiles/Default/cursor_shape block"
 
 if has("autocmd")
     au VimEnter,InsertLeave * silent execute '!echo -ne "\e[2 q"' | redraw!
@@ -453,7 +453,7 @@ inoremap jj <Esc>
 inoremap jk <Right>
 " , always followed by a space
 inoremap , ,<Space>
-inoremap . .<Space>
+" inoremap . .<Space>
 nnoremap <BS> <C-^>
 
 map Y y$
