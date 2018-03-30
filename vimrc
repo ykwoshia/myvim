@@ -831,6 +831,9 @@ Plug 'junegunn/gv.vim'
 " < L9 > {{{1
 Plug 'vim-scripts/L9'
 " }}}1
+" < LineJuggler > {{{1
+plug 'vim-scripts/lineJuggler'
+" }}}1
 "  < Align > {{{1
 Plug 'junegunn/vim-easy-align'
 " }}}1
@@ -1101,6 +1104,9 @@ let NERDSpaceDelims = 1
 Plug 'scrooloose/nerdtree'
 
 
+" }}}1
+ " < repmo.vim > {{{1
+Plug 'vim-scripts/repmo.vim'
 " }}}1
 "  < Syntastic > {{{1
 
