@@ -832,7 +832,7 @@ Plug 'junegunn/gv.vim'
 Plug 'vim-scripts/L9'
 " }}}1
 " < LineJuggler > {{{1
-plug 'vim-scripts/lineJuggler'
+Plug 'vim-scripts/LineJuggler'
 " }}}1
 "  < Align > {{{1
 Plug 'junegunn/vim-easy-align'
