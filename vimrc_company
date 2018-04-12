@@ -1,38 +1,77 @@
-" =============================================================================
-"        << 判断操作系统是 Windows 还是 Linux 和判断是终端还是 Gvim >>
-" =============================================================================
-
-" -----------------------------------------------------------------------------
-"  < 判断操作系统是否是 Windows 还是 Linux >
-" -----------------------------------------------------------------------------
+" vim:fdm=marker
+"                    << Global Variable >> {{{1
+ " < Windows or Linux > {{{2
 if(has("win32") || has("win64") || has("win95") || has("win16"))
     let g:iswindows = 1
 else
     let g:iswindows = 0
 endif
-
-" -----------------------------------------------------------------------------
-"  < 判断是终端还是 Gvim >
-" -----------------------------------------------------------------------------
+" }}}2
+"  < GUI or Terminal > {{{2
 if has("gui_running")
     let g:isGUI = 1
 else
     let g:isGUI = 0
 endif
+" }}}2
+" < Distro > {{{2
+" let g:distro = 'ubuntu'
+" let g:distro = 'others'
+" }}}2
+" }}}1
+"                       << Default Configuration >> {{{1
 
 
-" =============================================================================
-"                          << 以下为软件默认配置 >>
-" =============================================================================
+"  < Should not change options > {{{2
 
-" -----------------------------------------------------------------------------
-"  < Windows Gvim 默认配置> 做了一点修改
-" -----------------------------------------------------------------------------
+set nocompatible
+
+" }}}2
+"  < GUI User Interface > {{{2
+
+if g:isGUI
+    " let &statusline=' %t %{&mod?(&ro?"*":"+"):(&ro?"=":" ")} %1*|%* %{&ft==""?"any":&ft} %1*|%* %{&ff} %1*|%* %{(&fenc=="")?&enc:&fenc}%{(&bomb?",BOM":"")} %1*|%* %=%1*|%* 0x%B %1*|%* (%l,%c%V) %1*|%* %L %1*|%* %P'
+    " set statusline=%t\ %1*%m%*\ %1*%r%*\ %2*%h%*%w%=%l%3*/%L(%p%%)%*,%c%V]\ [%b:0x%B]\ [%{&ft==''?'TEXT':toupper(&ft)},%{toupper(&ff)},%{toupper(&fenc!=''?&fenc:&enc)}%{&bomb?',BOM':''}%{&eol?'':',NOEOL'}]
+
+    " For Win32 GUI: remove 't' flag from 'guioptions': no tearoff menu entries
+    " let &guioptions = substitute(&guioptions, "t", "", "g")
+    set guioptions-=m
+    set guioptions-=T
+    set guioptions-=r
+    set guioptions-=L
+    map <silent> <c-F11> :if &guioptions =~# 'm' <Bar>
+                \set guioptions-=m <Bar>
+                \set guioptions-=T <Bar>
+                \set guioptions-=r <Bar>
+                \set guioptions-=L <Bar>
+                \else <Bar>
+                \set guioptions+=m <Bar>
+                \set guioptions+=T <Bar>
+                \set guioptions+=r <Bar>
+                \set guioptions+=L <Bar>
+                \endif<CR>
+
+
+endif
+
+
+" }}}2
+"  < Windows Gvim > {{{2
+
 if (g:iswindows && g:isGUI)
     source $VIMRUNTIME/vimrc_example.vim
     source $VIMRUNTIME/mswin.vim
     behave mswin
     set diffexpr=MyDiff()
+
+    "解决菜单乱码
+    source $VIMRUNTIME/delmenu.vim
+    source $VIMRUNTIME/menu.vim
+
+    "解决consle输出乱码
+    language messages zh_CN.utf-8
+
+    map <F11> <Esc>:call libcallnr("gvimfullscreen.dll", "ToggleFullScreen", 0)<CR>
 
     function MyDiff()
         let opt = '-a --binary '
@@ -59,119 +98,141 @@ if (g:iswindows && g:isGUI)
     endfunction
 endif
 
-" -----------------------------------------------------------------------------
-"  < Linux Gvim/Vim 默认配置> 做了一点修改
-" -----------------------------------------------------------------------------
+
+" }}}2
+"  < Linux Gvim/Vim > {{{2
+
 if !g:iswindows
-    set hlsearch        "高亮搜索
-    set incsearch       "在输入要搜索的文字时，实时匹配
 
-    " Uncomment the following to have Vim jump to the last position when
-    "
-    " reopening a file
-    if has("autocmd")
-        au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
-        au BufRead * normal zi
-    endif
+    if g:isGUI
 
-   if g:isGUI
-       " Source a global configuration file if available
-   else
-        " This line should not be removed as it ensures that various options are
-        " properly set to work with the Vim-related packages available in Debian.
-        runtime! debian.vim
-
-        " Vim5 and later versions support syntax highlighting. Uncommenting the next
-        " line enables syntax highlighting by default.
-
-        " if g:isGUI
-            " set mouse=a                    " 在任何模式下启用鼠标
-        " endif
-        " set ttymouse=xterm
-        set t_Co=256                   " 在终端启用256色
+    else
+        " very important can not change10/11/16
+        set term=screen-256color
+        " terminal option : number of colors
+        set t_Co=256
+        " terminal option : clearing uses the current background color
         set t_ut=
 
-   endif
+        " if has("lua") || has("mac")
+            " let &t_SI = "\e[5 q"
+            " let &t_EI = "\e[2 q"
+        " endif
+    endif
 endif
 
+" }}}2
+" }}}1
+"                          << Auto Cmd >> {{{1
+" Uncomment the following to have Vim jump to the last position when
+au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
+" toggle folder off when open file
+" au BufRead * normal zi
+" auto change dir to current file but conflict with fugitive
+" au BufRead,BufNewFile,BufEnter * cd %:p:h
 
-" =============================================================================
-"                          << 以下为用户自定义配置 >>
-" =============================================================================
+" au InsertEnter,VimLeave * silent execute "!gconftool-2 --type string --set /apps/gnome-terminal/profiles/Default/cursor_shape ibeam"
+" au InsertLeave,VimEnter * silent execute "!gconftool-2 --type string --set /apps/gnome-terminal/profiles/Default/cursor_shape block"
 
-" -----------------------------------------------------------------------------
-"  < Vundle 插件管理工具配置 >
-" -----------------------------------------------------------------------------
-" Use Vim settings, rather than Vi settings (much better!).
-" This must be first, because it changes other options as a side effect.
-set nocompatible
-filetype off
+" if has("autocmd")
+    " au VimEnter,InsertLeave * silent execute '!echo -ne "\e[2 q"' | redraw!
+    " au InsertEnter,InsertChange *
+                " \ if v:insertmode == 'i' | 
+                " \   silent execute '!echo -ne "\e[6 q"' | redraw! |
+                " \ elseif v:insertmode == 'r' |
+                " \   silent execute '!echo -ne "\e[4 q"' | redraw! |
+                " \ endif
+    " au VimLeave * silent execute '!echo -ne "\e[ q"' | redraw!
+" endif
+" }}}1
+"                          << User functions >> {{{1
+function! s:ExecuteInShell(command)
+    let command = join(map(split(a:command), 'expand(v:val)'))
+    " let winnr = bufwinnr('^' . command . '$')
+    let winnr = bufwinnr('^' . "command" . '$')
+    " silent! execute  winnr < 0 ? 'botright new ' . fnameescape(command) : winnr . 'wincmd w'
+    silent! execute  winnr < 0 ? 'botright new ' . "command" : winnr . 'wincmd w'
+    setlocal buftype=nowrite bufhidden=wipe nobuflisted noswapfile nowrap number nofoldenable
+    echo 'Execute ' . command . '...'
+    silent! execute 'silent %!'. command
+    silent! execute 'resize ' . line('$')
+    silent! redraw
+    silent! execute 'au BufUnload <buffer> execute bufwinnr(' . bufnr('#') . ') . ''wincmd w'''
+    silent! execute 'nnoremap <silent> <buffer> <LocalLeader>r :call <SID>ExecuteInShell(''' . command . ''')<CR>'
+    silent! execute "wincmd k"
+    echo 'Shell command ' . command . ' executed.'
+endfunction
+command! -complete=shellcmd -nargs=+ S call s:ExecuteInShell(<q-args>)
 
-if !g:iswindows
-    set rtp+=~/.vim/bundle/Vundle.vim
-    call vundle#begin()
+" }}}1
+"                          << User Options >> {{{1
+"  < Appearance Options > {{{2
+
+" ------------ colorscheme
+if g:isGUI
+    colorscheme Tomorrow-Night-Eighties
+    " colorscheme base16-flat
+    " colorscheme molokai
 else
-    set rtp+=$VIM/vimfiles/bundle/vundle.vim/
-    call vundle#begin('$VIM/vimfiles/bundle/')
+    colorscheme Tomorrow-Night-Eighties
+    " let base16colorspace=256  " Access colors present in 256 colorspace
+    " colorscheme base16-flat
+    " colorscheme molokai
+    " let g:rehash256=1
 endif
-" set the runtime path to include Vundle and initialize
-" alternatively, pass a path where Vundle should install plugins
-"call vundle#begin('~/some/path/here')
 
-" let Vundle manage Vundle, required
-Plugin 'VundleVim/Vundle.vim'
+" ------------ font
+if g:iswindows
+    " set guifont=Source_Code_Pro:h11
+    " set guifont=YaHei_Consolas_Hybrid:h10
+else
+    if g:isGUI
+        " set guifont=BitstreamVeraSansMono\ 10.5
+        if has("lua")
 
-" The following are examples of different formats supported.
-" Keep Plugin commands between vundle#begin/end.
-" plugin on GitHub repo
-Plugin 'tpope/vim-fugitive'
-Plugin 'L9'
-Plugin 'rstacruz/sparkup', {'rtp': 'vim/'}
-" Plugin 'FromtonRouge/OmniCppComplete'
-" Plugin 'Lokaltog/vim-powerline'
-"Plugin 'Shougo/neocomplete.vim'
-"Plugin 'Yggdroot/indentLine'  "low speed for scrolling
-Plugin 'Align'
-Plugin 'Shougo/neocomplcache'
-Plugin 'TxtBrowser'
-Plugin 'ZoomWin'
-Plugin 'a.vim'
-Plugin 'bufexplorer.zip'
-Plugin 'ccvext.vim'
-Plugin 'ctrlp.vim'
-" Plugin 'christoomey/vim-tmux-navigator'
-Plugin 'easymotion/vim-easymotion'
-Plugin 'ervandew/supertab'
-Plugin 'jiangmiao/auto-pairs'
-" Plugin 'justinmk/vim-sneak'
-" not very useful
-" Plugin 'justinmk/vim-dirvish'
-Plugin 'majutsushi/tagbar'
-" Plugin 'minibufexpl.vim'
-Plugin 'ervandew/snipmate.vim'
-" Plugin 'klen/python-mode'
-Plugin 'repeat.vim'
-Plugin 'scrooloose/nerdcommenter'
-" Plugin 'scrooloose/nerdtree'
-Plugin 'scrooloose/syntastic'
-Plugin 'std_c.zip'
-Plugin 'taglist.vim'
-Plugin 'tpope/vim-surround'
-" not very useful
-" Plugin 'tpope/vim-eunuch'
-Plugin 'vim-airline/vim-airline'
-Plugin 'vim-scripts/Mark--Karkat'
-Plugin 'vim-scripts/cSyntaxAfter'
-Plugin 'wesleyche/SrcExpl'
-Plugin 'winmanager'
-" All of your Plugins must be added before the following line
-call vundle#end()            " required
+        else
+            if has("mac")
+                " set guifont=Source\ Code\ Pro:h16
+            else
+                " set guifont=BitstreamVeraSansMono\ 11
+            endif
+        endif
+    endif
+endif
 
-" -----------------------------------------------------------------------------
-"  < 编码配置 >
-" -----------------------------------------------------------------------------
-" 注：使用utf-8格式后，软件与程序源码、文件路径不能有中文，否则报错
-" if g:isGUI
+" ------------ mouse
+" can not use in mac and redhat
+" set mouse=a
+" ------------ signs
+set showcmd
+set wildmenu
+" set colorcolumn=80
+
+set number
+set relativenumber
+set laststatus=2
+set cmdheight=2
+set cursorline
+set cursorcolumn
+set splitbelow
+set splitright
+
+set nowrap
+set shortmess=atI
+if has("lua")
+    winpos 0 0
+    set lines=500 columns=500
+else
+    winpos 1250 0
+    set lines=80 columns=100
+endif
+
+if executable('goldendict')
+    set keywordprg=goldendict
+endif 
+" }}}2
+"  < Encoding Options > {{{2
+
 if has("multi_byte")
     if &termencoding == ""
         let &termencoding=&encoding
@@ -180,225 +241,182 @@ if has("multi_byte")
     set encoding=utf-8
     setglobal fileencoding=utf-8
     " setglobal bomb
-     " set fileencodings=ucs-bom,utf-8,gb2312,gbk,gb18030
+    " set fileencodings=ucs-bom,utf-8,gb2312,gbk,gb18030
     set fileencodings=utf-8,gb2312,gbk,gb18030
 endif
 
-" else
-    " set termencoding=utf-8,gb2312,gbk,gb18030
-" endif
-" set fileencoding=utf-8                                "设置当前文件编码
-" set fileencodings=ucs-bom,utf-8,gbk,cp936,latin-1     "设置支持打开的文件的编码
 
-" 文件格式，默认 ffs=dos,unix
-set fileformat=unix                                   "设置新文件的<EOL>格式
-set fileformats=unix,dos,mac                          "给出文件的<EOL>格式类型
+" }}}2
+"  < Edit Options > {{{2
 
-if (g:iswindows && g:isGUI)
-    "解决菜单乱码
-    source $VIMRUNTIME/delmenu.vim
-    source $VIMRUNTIME/menu.vim
 
-    "解决consle输出乱码
-    language messages zh_CN.utf-8
-endif
+" ------------ file type & indent
 
-" -----------------------------------------------------------------------------
-"  < 编写文件时的配置 >
-" -----------------------------------------------------------------------------
-" 命令				检测	plugin	indent ~
-" :filetype on			打开	未改变	未改变
-" :filetype off			关闭	未改变	未改变
-" :filetype plugin on		打开	打开	未改变
-" :filetype plugin off		未改变	关闭	未改变
-" :filetype indent on		打开	未改变	打开
-" :filetype indent off		未改变	未改变	关闭
-" :filetype plugin indent on	打开	打开	打开
-" :filetype plugin indent off	未改变	关闭	关闭
+" command                        detection    plugin        indent ~
+" :filetype on                   on           unchanged     unchanged
+" :filetype off                  off          unchanged     unchanged
+" :filetype plugin on            on           on            unchanged
+" :filetype plugin off           unchanged    off           unchanged
+" :filetype indent on            on           unchanged     on
+" :filetype indent off           unchanged    unchanged     off
+" :filetype plugin indent on     on           on            on
+" :filetype plugin indent off    unchanged    off           off
+
+filetype on
+filetype plugin on
+filetype plugin indent on
+" usually when use smartindent should set autoindent
+set autoindent
+set smartindent
+
+
+" ------------ buffer
+set hidden
+
+" ------------ syntax
+syntax on
+
+" ------------ fold
+set foldenable
+set foldmethod=indent
+" set foldmethod=manual
+" set foldmethod=marker
+set foldlevel=99
 "
-filetype on                                     "启用文件类型侦测
-filetype plugin on                              "针对不同的文件类型加载对应的插件
-filetype plugin indent on                       "启用缩进
-set smartindent                                 "启用智能对齐方式
-set expandtab                                   "将Tab键转换为空格
-set tabstop=4                                   "设置Tab键的宽度
-set shiftwidth=4                                "换行时自动缩进4个空格
-set smarttab                                    "指定按一次backspace就删除shiftwidth宽度的空格
-set foldenable                                  "启用折叠
-set foldmethod=indent                        "indent 折叠方式
-" set foldmethod=manual                           "manual 折叠方式
-"set foldmethod=marker                        "marker 折叠方式
-set backspace=2                " 设置退格键可用
+" ------------ tab
+set expandtab
+set tabstop=4
+set shiftwidth=4
+set smarttab
+
+" ------------ backspace
+" equal to :set backspace=indent,eol,start
+set backspace=2
 
 
-" 当文件在外部被修改，自动更新该文件
-set autoread
 
+" ------------ search
+set hlsearch
+set incsearch
+" set noincsearch
+set ignorecase
+set smartcase
 
-set ignorecase                                        "搜索模式里忽略大小写
-set smartcase                                         "如果搜索模式包含大写字符，不使用 'ignorecase' 选项，只有在输入搜索模式并且打开 'ignorecase' 选项时才会使用
-" set noincsearch                                       "在输入要搜索的文字时，取消实时匹配
+" ------------ find & replace
+set magic
 
+" ------------ copy & paste
 set clipboard=unnamed
 
-" -----------------------------------------------------------------------------
-"  < 界面配置 >
-" -----------------------------------------------------------------------------
-if g:isGUI
-    " set cc=80
-    " 个性化状栏（这里提供两种方式，要使用其中一种去掉注释即可，不使用反之）
-    " let &statusline=' %t %{&mod?(&ro?"*":"+"):(&ro?"=":" ")} %1*|%* %{&ft==""?"any":&ft} %1*|%* %{&ff} %1*|%* %{(&fenc=="")?&enc:&fenc}%{(&bomb?",BOM":"")} %1*|%* %=%1*|%* 0x%B %1*|%* (%l,%c%V) %1*|%* %L %1*|%* %P'
-    " set statusline=%t\ %1*%m%*\ %1*%r%*\ %2*%h%*%w%=%l%3*/%L(%p%%)%*,%c%V]\ [%b:0x%B]\ [%{&ft==''?'TEXT':toupper(&ft)},%{toupper(&ff)},%{toupper(&fenc!=''?&fenc:&enc)}%{&bomb?',BOM':''}%{&eol?'':',NOEOL'}]
 
-    " For Win32 GUI: remove 't' flag from 'guioptions': no tearoff menu entries
-    " let &guioptions = substitute(&guioptions, "t", "", "g")
-    " 显示/隐藏菜单栏、工具栏、滚动条，可用 Ctrl + F11 切换
-    set guioptions-=m
-    set guioptions-=T
-    set guioptions-=r
-    set guioptions-=L
-    map <silent> <c-F11> :if &guioptions =~# 'm' <Bar>
-                \set guioptions-=m <Bar>
-                \set guioptions-=T <Bar>
-                \set guioptions-=r <Bar>
-                \set guioptions-=L <Bar>
-                \else <Bar>
-                \set guioptions+=m <Bar>
-                \set guioptions+=T <Bar>
-                \set guioptions+=r <Bar>
-                \set guioptions+=L <Bar>
-                \endif<CR>
+" ------------ file save and backup
+set autoread
 
-
-endif
-
-
-if !g:iswindows
-    set term=screen-256color   " very important can not change10/11/16 
-endif
-
-if has("syntax")
-    syntax on
-endif
-
-" 设置代码配色方案
-if g:isGUI
-    colorscheme Tomorrow-Night-Eighties               "Gvim配色方案
-    " colorscheme molokai
-    " colorscheme solarized
+if has("mac")
+    set fileformat=mac
+    set fileformats=mac,unix,dos
 else
-    colorscheme Tomorrow-Night-Eighties               "终端配色方案
-    " colorscheme molokai
-    " colorscheme solarized
+    set fileformat=unix
+    set fileformats=unix,dos,mac
 endif
 
+"  'backup' 'writebackup'	action	~
+"     off	     off	no backup made
+"     off	     on		backup current file, deleted afterwards (default)
+"     on	     off	delete old backup, backup current file
+"     on	     on		delete old backup, backup current file
+set nobackup
+set writebackup
+" set noswapfile
 
 
-set showcmd
-set magic
-set wildmenu
 
-set number                                            "显示行号
-" set relativenumber
-set laststatus=2                                      "启用状态栏信息
-set cmdheight=2                                       "设置命令行的高度为2，默认为1
-set cursorline                                        "突出显示当前行
-set cursorcolumn                                       "突出显示当前行
-if g:iswindows
-    set guifont=Source_Code_Pro:h11
-    " set guifont=YaHei_Consolas_Hybrid:h10                 "设置字体:字号（字体名称空格用下划线代替）
-else
-    if g:isGUI
-        set guifont=BitstreamVeraSansMono\ 10.5
-    endif
-    " set guifont=SourceCodePro\ 11                           "设置字体:字号（字体名称空格用下划线代替）
-endif
+" }}}2
+"  < Other Options > {{{2
 
-set nowrap                                            "设置不自动换行
-set shortmess=atI                                     "去掉欢迎界面
-" au GUIEnter * simalt ~x                              "窗口启动时自动最大化
+set history=50        " keep 50 lines of command line history
 
-winpos 1250 0                                         "指定窗口出现的位置，坐标原点在屏幕左上角
-set lines=80 columns=100                              "指定窗口大小，lines为高度，columns为宽度
-" set lines=500 columns=500                              "指定窗口大小，lines为高度，columns为宽度
+set vb t_vb=
 
-" -----------------------------------------------------------------------------
-"  < 其它配置 >
-" -----------------------------------------------------------------------------
-set history=50		" keep 50 lines of command line history
+" }}}2
+"                         << ------------ Key Mapping Begin>> {{{1
+" }}}1
+"  < Abbr Mapping > {{{1
 
-set writebackup                             "保存文件前建立备份，保存成功后删除该备份
-set nobackup                                "设置无备份文件
-" set noswapfile                              "设置无临时文件
-set vb t_vb=                                "关闭提示音
+" iab xdate <c-r>=strftime("%d/%m/%y %H:%M:%S")<cr>
+iab xdate <c-r>=strftime("%m/%d/%y")<cr>
+" iab endl << endl
+iab cout cout <<
+iab cin cin >>
+iab #i #include
+iab teh the
 
-" -----------------------------------------------------------------------------
-"  < Key Mapping >
-" -----------------------------------------------------------------------------
-"  Leader ---------------------------------------------------------
-" cancel all insert mode space map
-let mapleader = ";"
+
+" }}}1
+"  < Leader Key Mapping > {{{1
+
+
+" let mapleader = "'"
+" let maplocalleader = "-"
 " map <Space> <Leader>
 " let mapleader = "\<Space>"
-map <Space> <Plug>(easymotion-prefix)
+nnoremap <Space> :
 
-" <Leader>f{char} to move to {char}
-" map  <Leader>f <Plug>(easymotion-bd-f)
-" nmap <Leader>f <Plug>(easymotion-overwin-f)
-map  f <Plug>(easymotion-bd-f)
-nmap f <Plug>(easymotion-overwin-f)
+map <Space><Space> <Plug>NERDCommenterToggle
 
-" s{char}{char} to move to {char}{char}
-nmap s <Plug>(easymotion-overwin-f2)
+" nnoremap <buffer> <LocalLeader>j <c-w>j
+" map <Space>a A;<Esc>
+" "'
+nnoremap <Leader>' ''
+" ";
+" nnoremap <Leader>; A;<Esc>
+" inoremap <Leader>; <Esc>A;<Esc>
 
-" Move to line
-map <Leader>j <Plug>(easymotion-bd-jk)
-nmap <Leader>j <Plug>(easymotion-overwin-line)
-
-" Move to word
-map  <Leader>k <Plug>(easymotion-bd-w)
-nmap <Leader>k <Plug>(easymotion-overwin-w)
-
-" Gif config
-map  / <Plug>(easymotion-sn)
-omap / <Plug>(easymotion-tn)
-
-" These `n` & `N` mappings are options. You do not have to map `n` & `N` to EasyMotion.
-" Without these mappings, `n` & `N` works fine. (These mappings just provide
-" different highlight method and have some other features )
-map  n <Plug>(easymotion-next)
-map  N <Plug>(easymotion-prev)
-
-let g:EasyMotion_smartcase = 1
+nnoremap <Space>; q:k
+nnoremap <Space>] m`:silent +g/\m^\s*$/d<CR>``:noh<CR>
+nnoremap <Space>[ m`:silent -g/\m^\s*$/d<CR>``:noh<CR>
+" "A;
 
 
-nnoremap <Leader>; A;<Esc>
-
-" "B 
+" "B
 " nnoremap <Leader>b :update<CR>:!make<CR>
-" "E 
+" "E
 if findfile("Makefile") == "Makefile"
-    map <Leader>e :update<CR>:!make<CR>
+    if g:isGUI
+        nnoremap <Leader>e :update<CR>:!make && ./out<CR>
+        " nnoremap <Space>e :update<CR>:!make && ./out<CR>
+    else
+        nnoremap <Leader>e :update<CR>:S make && ./out<CR>
+        " nnoremap <Space>e :update<CR>:S make && ./out<CR>
+    endif
 else
-    map <Leader>e :update<CR>:!./%<CR>
+    " todo how to run in shell use % 10/16/16
+    if g:isGUI
+        nnoremap <Leader>e :update<CR>:!./%<CR>
+        " nnoremap <Space>e :update<CR>:!./%<CR>
+    else
+        nnoremap <Leader>e :update<CR>:S ./*.pl*<CR>
+        " nnoremap <Space>e :update<CR>:S ./*.pl*<CR>
+    endif
 endif
 " nnoremap <Leader>e :update<CR>:!make<CR>
 
-" "G 
-nnoremap <Leader>g :vimgrep // *.*<left><left><left><left><left>
-
-" window
-" "H 
-" nnoremap <Leader>h <C-w>h
-" "I 
-" nnoremap <Leader>j <C-w>j
-" "J 
-" nnoremap <Leader>k <C-w>k
-" "K 
- " nnoremap <Leader>l <C-w>l
+" "G
+" nnoremap <Leader>g :vimgrep // *.*<left><left><left><left><left>
+" nnoremap <leader>g :silent execute "grep! -R " . shellescape(expand("<cWORD>")) . " ."<cr> :copen<cr>
+" " window
+" "H
+nnoremap <Leader>h <C-w>h
+" "I
+nnoremap <Leader>j <C-w>j
+" "J
+nnoremap <Leader>k <C-w>k
+" "K
+nnoremap <Leader>l <C-w>l
 
 " "Q
 nnoremap <Leader>q <Esc>:q<CR>
+nnoremap <Space>q <Esc>:q<CR>
 
 " "R
 " "conflict with Mark--Karkat <Leader> m n r *
@@ -407,56 +425,62 @@ nnoremap <Leader>q <Esc>:q<CR>
 " nnoremap <Leader>r :!./out<CR>
 " /
 
-
 " "S
-" nnoremap <Leader>s :update<CR>
+" <leader>s use google search words selected
 nnoremap <Leader>ss :%s/\s\+$//ge<cr>:nohl<cr>
+nnoremap <Leader>sp :set spell!<CR>
+nnoremap <Leader>sl :redraw!<CR>
+nnoremap <Leader>so :source $MYVIMRC<CR>:AirlineRefresh<CR>
 
 " "T
-" nnoremap <Leader>t :update<CR>:!./%<CR>
+" nnoremap <Space>t :NERDTreeToggle<CR>
+nnoremap <F3> :NERDTreeToggle<CR>
+inoremap <F3> <Esc>:NERDTreeToggle<CR>
+" V
+" nnoremap <Space>v :e ~/.vimrc<CR>
 " "W
-nnoremap <Leader>w <Esc>:w<CR>
+nnoremap <Leader>w <Esc>:wq<CR>
 " "X
 nnoremap <Leader>x :xa<CR>
+nnoremap <Space>x :xa<CR>
 
-"  Leader normal key ---------------------------------------------------------
+
+" }}}1
+"  < Normal Key Mapping > {{{1
+
 " Don't use Ex mode, use Q for formatting
 " map Q gq
-" "; 
+" ";
 " jj or jk 插入模式下go to normal mode
 inoremap jj <Esc>
-
-"    
-"  "vim-sneak is better than easymotion 10/10/16 
-"  "replace 'f' with 1-char Sneak
-"  nmap f <Plug>Sneak_f
-"  nmap F <Plug>Sneak_F
-"  xmap f <Plug>Sneak_f
-"  xmap F <Plug>Sneak_F
-"  omap f <Plug>Sneak_f
-"  omap F <Plug>Sneak_F
-"  "replace 't' with 1-char Sneak
-"  nmap t <Plug>Sneak_t
-"  nmap T <Plug>Sneak_T
-"  xmap t <Plug>Sneak_t
-"  xmap T <Plug>Sneak_T
-"  omap t <Plug>Sneak_t
-"  omap T <Plug>Sneak_T
-"  
-"  let g:sneak#streak = 1
-"  let g:sneak#use_ic_scs = 1
+inoremap jk <Right>
+" , always followed by a space
+inoremap , ,<Space>
+" inoremap . .<Space>
+nnoremap <BS> <C-^>
 
 map Y y$
+map 0 ^
+" Type 12<Enter> to go to line 12 (12G breaks my wrist)
+" Hit Enter to go to end of file.
+" Hit Backspace to go to beginning of file.
+" nnoremap <CR> G
+" nnoremap <BS> gg
+
+" Quickly select text you just pasted:
+noremap gV `[v`]
+"dgn is easy to use
+vnoremap < <gv
+vnoremap > >gv
+
+" }}}1
+"  < Function Key Mapping > {{{1
 
 
-
-
-"  function key ---------------------------------------------------------
 " F2
 " for NerdTree
 " F3
 " for xxx
-nnoremap <F9> :SyntasticToggleMode<CR>
 " F4 compile
 nnoremap <F4> :update<CR>:!make<CR>
 inoremap <F4> <Esc>:update<CR>:!make<CR>
@@ -470,39 +494,40 @@ inoremap <F6> <Esc>:update<CR>:!./%<CR>
 inoremap <F7> [I:let nr = input("Which one: ")<Bar>exe "normal " . nr ."[\t"<CR>
 nnoremap <F7> <Esc>[I:let nr = input("Which one: ")<Bar>exe "normal " . nr ."[\t"<CR>
 
+nnoremap <F12> :SyntasticToggleMode<CR>
+
 nnoremap <F11> :call libcallnr("gvimfullscreen.dll", "ToggleFullScreen", 0)<CR>
 inoremap <F11> <Esc>:call libcallnr("gvimfullscreen.dll", "ToggleFullScreen", 0)<CR>
 
-"  CTRL keys ---------------------------------------------------------
-" 至行首
-cnoremap <C-A>		<Home>
-" 后退一个字符
-cnoremap <C-B>		<Left>
-" 删除光标所在的字符
-cnoremap <C-D>		<Del>
-" 至行尾
-cnoremap <C-E>		<End>
-" 前进一个字符
-cnoremap <C-F>		<Right>
-" 取回较新的命令行
-cnoremap <C-N>		<Down>
-" 取回以前 (较旧的) 命令行
-cnoremap <C-P>		<Up>
-" 后退一个单词
-"cnoremap <A-b>	<S-Left>
-" 前进一个单词
-"cnoremap <A-F>	<S-Right>
-"
-"
+
+" }}}1
+"  < Ctrl Key Mapping > {{{1
+
+cnoremap <C-A>        <Home>
+cnoremap <C-B>        <Left>
+cnoremap <C-D>        <Del>
+cnoremap <C-E>        <End>
+cnoremap <C-F>        <Right>
+cnoremap <C-N>        <Down>
+cnoremap <C-P>        <Up>
+"cnoremap <A-b>    <S-Left>
+"cnoremap <A-F>    <S-Right>
+
+
+" }}}1
+"  < Shift Key Mapping > {{{1
+
 "  shift keys ---------------------------------------------------------
 " in konsole it is used to shift termianl tabs
 " map <S-Left> :tabp<CR>
 " map <S-Right> :tabn<CR>
-"
-" below is new
-"
+
+
+
+" }}}1
+"  < Alt Key Mapping > {{{1
+
 "  Alt keys ---------------------------------------------------------
-" redhat terminal sucks
 if !  g:isGUI
     let c='a'
     while c <= 'z'
@@ -517,16 +542,18 @@ if !  g:isGUI
         exec "imap \e".C." <A-".C.">"
         let C = nr2char(1+char2nr(C))
     endw
-    
+
     set timeout ttimeoutlen=50
 endif
-" " " A-a
-map <A-a> <Plug>NERDCommenterToggle
-" 
+" " " A-A
+" map <A-a> <Plug>NERDCommenterToggle
+nnoremap <A-a> A:<CR>
+inoremap <A-a> <Esc>A:<CR>
+
 " " " A-B
-nnoremap <A-b> :update<CR>:!make<CR>
-nnoremap <A-B> :update<CR>:!make<CR>
-" 
+" nnoremap <A-b> :update<CR>:!make<CR>
+" nnoremap <A-B> :update<CR>:!make<CR>
+"
 " " " A-C
 " " copy to clipboard
 " inoremap <A-c> <Esc>"+yy
@@ -535,66 +562,70 @@ nnoremap <A-B> :update<CR>:!make<CR>
 " inoremap <A-C> <Esc>"+yy
 " nnoremap <A-C> <Esc>"+yy
 " vnoremap <A-C> "+y
-" 
+"
 " " " A-D
- " sublime ctrl+shift+k
- nnoremap <A-d> dd
- nnoremap <A-D> ddk
- inoremap <A-d> <C-O>dd
- inoremap <A-D> <C-O>ddk
- vnoremap <A-d> d
- vnoremap <A-D> dk
-" 
+" sublime ctrl+shift+k
+nnoremap <A-d> "_dd
+nnoremap <A-D> "_ddk
+inoremap <A-d> <C-O>"_dd
+inoremap <A-D> <C-O>"_ddk
+vnoremap <A-d> "_d
+vnoremap <A-D> "_dk
+"
 " " " A-E
-"auto-pair occupy 
+"auto-pair occupy
+
 " " " A-F
-" 
+nnoremap <A-f> :vs<cr>gf<cr>
+
 " " " A-G
-" 
+"
 " " A-H
 inoremap <A-h> <Left>
-"nnoremap <A-h> 
+"nnoremap <A-h>
 
 " " A-J
 "inoremap <A-j> <Down>
 "nnoremap <A-j> ddp
 "vnoremap <A-j> <Esc>`>jdd`<Pgv
 "vnoremap <A-J> <Esc>`>jdd`<Pgv
-nnoremap <A-j> o<Esc>k
+" nnoremap <A-j> o<Esc>k
 inoremap <A-j> <Esc>o
 
 " " A-K
-nnoremap <A-k> O<Esc>
+" nnoremap <A-k> O<Esc>
 inoremap <A-k> <Esc>O
 "inoremap <A-k> <Up>
 "nnoremap <A-k> kddpk
 "vnoremap <A-k> <Esc>`<kdd`>pgv
 "vnoremap <A-K> ykddgv<Esc>pgv
- 
- " " A-L
+
+" " A-L
 "inoremap <A-l> <Right>
- "nnoremap <A-l> 
+"nnoremap <A-l>
 inoremap <silent> <A-l> <Esc>:call AutoPairsJump()<CR>a
-" 
+"
 " " " A-M
 " " sublime ctrl+l
 " nnoremap <A-m> V
 " nnoremap <A-M> V
 " vnoremap <A-m> j
 " vnoremap <A-M> k
-" 
+"
 " " " A-N
 "  Autopair occupy
-" 
+"
 " " " A-O
 " tmux occupy
-"nnoremap <A-m> o<Esc>k
-"nnoremap <A-M> O<Esc>
-"inoremap <A-m> <Esc>o
-"inoremap <A-M> <Esc>O
+if !exists('$TMUX')
+    nnoremap <A-o> o<Esc>k
+    nnoremap <A-O> O<Esc>
+    inoremap <A-o> <Esc>o
+    inoremap <A-O> <Esc>O
+endif
 "
- " " A-P
-" autopair plugin occupy 
+" " A-P
+" autopair plugin occupy
 
 " " " A-Q
 " map <A-q> <Esc>:q<CR>
@@ -605,6 +636,11 @@ nnoremap <A-Q> :q<CR>
 inoremap <A-Q> <Esc>:q<CR>
 vnoremap <A-Q> <Esc>:q<CR>
 
+" " A-R
+nnoremap <A-r> :update<CR>:!python %<CR>
+inoremap <A-r> <Esc>:update<CR>:!python %<CR>
+vnoremap <A-r> <Esc>:!python %<CR>
+
 " " A-S
 " map <A-s> <Esc>:update<CR>
 nnoremap <A-s> :update<CR>
@@ -613,55 +649,56 @@ vnoremap <A-s> <Esc>:update<CR>
 nnoremap <A-S> :update<CR>
 inoremap <A-S> <Esc>:update<CR>
 vnoremap <A-S> <Esc>:update<CR>
-" 
+"
 " " " A-T
-map <A-T> :!./out<CR>
-map <A-t> :!./out<CR>
-" 
+" map <A-T> :!./out<CR>
+" map <A-t> :!./out<CR>
+"
 " " " A-U
 " inoremap <A-u> <Esc>ui
 " inoremap <A-U> <Esc>ui
-" 
+"
 " " " A-V
-  " paste from clipboard
+nnoremap <A-v> :e ~/.vimrc<CR>
+" paste from clipboard
 " inoremap <A-v> <Esc>"+p
 " nnoremap <A-v> <Esc>"+p
 " vnoremap <A-v> "+p
 " inoremap <A-V> <Esc>"+p
 " nnoremap <A-V> <Esc>"+p
 " vnoremap <A-V> "+p
-" 
+"
 " " " A-W
-" 
+nnoremap <A-w> :wq<CR>
+inoremap <A-w> <Esc>:wq<CR>
+vnoremap <A-w> <Esc>:wq<CR>
+nnoremap <A-W> :wq<CR>
+inoremap <A-W> <Esc>:wq<CR>
+vnoremap <A-W> <Esc>:wq<CR>
+"
 " " " A-X
-" noremap <A-x> i<space><Esc>
-" 
+nnoremap <A-x> :xa<CR>
+inoremap <A-x> <Esc>:xa<CR>
+"
 " " " A-Y
 " " sublime ctrl+shift+d
- nnoremap <A-y> yyp
- nnoremap <A-Y> yyP
- vnoremap <A-y> y`>p
- vnoremap <A-Y> y`<P
- inoremap <A-y> <C-O>yyp
- inoremap <A-Y> <C-O>yyP
-" 
+nnoremap <A-y> yyp
+nnoremap <A-Y> yyP
+vnoremap <A-y> y`>p
+vnoremap <A-Y> y`<P
+" inoremap <A-y> <C-O>yyp
+" inoremap <A-Y> <C-O>yyP
+inoremap <A-y> <Esc>yyp
+inoremap <A-Y> <Esc>yyP
+
 " " " A-Z
 
+" }}}1
+"                         << ------------ Key Mapping End >> {{{1
+" }}}1
+"                    << Work With Other Tools >> {{{1
+"  < tmux > {{{2
 
-"
-" func Eatchar(pat)
-    " let c = nr2char(getchar(0))
-    " return (c =~ a:pat) ? '' : c
-" endfunc
-" iab xdate <c-r>=strftime("%d/%m/%y %H:%M:%S")<cr>
-iab xdate <c-r>=strftime("%m/%d/%y")<cr>
-iab endl << endl
-iab cout cout <<
-iab cin cin >>
-iab #i #include
-" -----------------------------------------------------------------------------
-"  < tmux setting >
-" -----------------------------------------------------------------------------
 if exists('$TMUX')
     function! TmuxOrSplitSwitch(wincmd, tmuxdir)
         let previous_winnr = winnr()
@@ -675,321 +712,41 @@ if exists('$TMUX')
     let previous_title = substitute(system("tmux display-message -p '#{pane_title}'"), '\n', '', '')
     let &t_ti = "\<Esc>]2;vim\<Esc>\\" . &t_ti
     let &t_te = "\<Esc>]2;". previous_title . "\<Esc>\\" . &t_te
+
     " for cursor sharp
+    " if has("lua") || has("mac")
+        " let &t_SI = "\<Esc>Ptmux;\<Esc>\e[5 q\<Esc>\\"
+        " let &t_EI = "\<Esc>Ptmux;\<Esc>\e[2 q\<Esc>\\"
+    " endif
+    let &t_EI = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=0\x7\<Esc>\\"
+    let &t_SI = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=1\x7\<Esc>\\"
+    let &t_SR = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=2\x7\<Esc>\\"
 
     nnoremap <silent> <C-h> :call TmuxOrSplitSwitch('h', 'L')<cr>
     nnoremap <silent> <C-j> :call TmuxOrSplitSwitch('j', 'D')<cr>
     nnoremap <silent> <C-k> :call TmuxOrSplitSwitch('k', 'U')<cr>
     nnoremap <silent> <C-l> :call TmuxOrSplitSwitch('l', 'R')<cr>
 else
+    let &t_SI="\<Esc>]50;CursorShape=1\x7"
+    let &t_SR="\<Esc>]50;CursorShape=2\x7"
+    let &t_EI="\<Esc>]50;CursorShape=0\x7"
 
+    " Konsole
     map <C-h> <C-w>h
     map <C-j> <C-w>j
     map <C-k> <C-w>k
     map <C-l> <C-w>l
 endif
 
+" }}}2
+"  < cscope > {{{2
 
-
-" =============================================================================
-"                          << 以下为常用插件配置 >>
-" =============================================================================
-
-" -----------------------------------------------------------------------------
-"  < a.vim 插件配置 >
-" -----------------------------------------------------------------------------
-" 用于切换C/C++头文件
-" :A     ---切换头文件并独占整个窗口
-" :AV    ---切换头文件并垂直分割窗口
-" :AS    ---切换头文件并水平分割窗口
-
-" -----------------------------------------------------------------------------
-"  < Align 插件配置 >
-" -----------------------------------------------------------------------------
-" 一个对齐的插件，用来——排版与对齐代码，功能强大，不过用到的机会不多
-
-" -----------------------------------------------------------------------------
-"  < auto-pairs 插件配置 >
-" -----------------------------------------------------------------------------
-" 用于括号与引号自动补全，不过会与函数原型提示插件echofunc冲突
-" 所以我就没有加入echofunc插件
-
-" let g:AutoPairsShortcutJump = '<Tab>'
-" -----------------------------------------------------------------------------
-"  < BufExplorer 插件配置 >
-" -----------------------------------------------------------------------------
-" 快速轻松的在缓存中切换（相当于另一种多个文件间的切换方式）
-" <Leader>be 在当前窗口显示缓存列表并打开选定文件
-" <Leader>bs 水平分割窗口显示缓存列表，并在缓存列表窗口中打开选定文件
-" <Leader>bv 垂直分割窗口显示缓存列表，并在缓存列表窗口中打开选定文件
-
-" -----------------------------------------------------------------------------
-"  < ctrlp 插件配置 >
-" -----------------------------------------------------------------------------
-let g:ctrlp_working_path_mode = 's'
-
-
-" -----------------------------------------------------------------------------
-"  < ccvext.vim 插件配置 >
-" -----------------------------------------------------------------------------
-" 用于对指定文件自动生成tags与cscope文件并连接
-" 如果是Windows系统, 则生成的文件在源文件所在盘符根目录的.symbs目录下(如: X:\.symbs\)
-" 如果是Linux系统, 则生成的文件在~/.symbs/目录下
-" 具体用法可参考www.vim.org中此插件的说明
-" <Leader>sy 自动生成tags与cscope文件并连接
-" <Leader>sc 连接已存在的tags与cscope文件
-
-" -----------------------------------------------------------------------------
-"  < cSyntaxAfter 插件配置 >
-" -----------------------------------------------------------------------------
-" 高亮括号与运算符等
-au! BufRead,BufNewFile,BufEnter *.{c,cpp,h,javascript} call CSyntaxAfter()
-
-" -----------------------------------------------------------------------------
-"  < indentLine 插件配置 >
-" -----------------------------------------------------------------------------
-" 用于显示对齐线，与 indent_guides 在显示方式上不同，根据自己喜好选择了
-" 在终端上会有屏幕刷新的问题，这个问题能解决有更好了
-" 开启/关闭对齐线
-"nmap <leader>il :IndentLinesToggle<CR>
-
-" 设置Gvim的对齐线样式
-"if g:isGUI
-"    let g:indentLine_char = "┊"
-"    let g:indentLine_first_char = "┊"
-"endif
-
-" 设置终端对齐线颜色
-" let g:indentLine_color_term = 239
-"
-" 设置 GUI 对齐线颜色
-" let g:indentLine_color_gui = '#A4E57E'
-
-" -----------------------------------------------------------------------------
-"  < Mark--Karkat（也就是 Mark） 插件配置 >
-" -----------------------------------------------------------------------------
-" 给不同的单词高亮，表明不同的变量时很有用，详细帮助见 :h mark.txt
-
-" " -----------------------------------------------------------------------------
-" "  < MiniBufExplorer 插件配置 >
-" " -----------------------------------------------------------------------------
-" " 快速浏览和操作Buffer
-" " 主要用于同时打开多个文件并相与切换
-
-" let g:miniBufExplMapWindowNavArrows = 1     "用Ctrl加方向键切换到上下左右的窗口中去
-" let g:miniBufExplMapWindowNavVim = 1        "用<C-k,j,h,l>切换到上下左右的窗口中去
-" let g:miniBufExplMapCTabSwitchBufs = 1      "功能增强（不过好像只有在Windows中才有用）
-" "                                            <C-Tab> 向前循环切换到每个buffer上,并在但前窗口打开
-" "                                            <C-S-Tab> 向后循环切换到每个buffer上,并在当前窗口打开
-
-" 在不使用 MiniBufExplorer 插件时也可用<C-k,j,h,l>切换到上下左右的窗口中去
-
-" -----------------------------------------------------------------------------
-"  < neocomplcache 插件配置 >
-" -----------------------------------------------------------------------------
-" 关键字补全、文件路径补全、tag补全等等，各种，非常好用，速度超快。
-let g:neocomplcache_enable_at_startup = 1     "vim 启动时启用插件
-let g:neocomplcache_disable_auto_complete = 1 "不自动弹出补全列表
-" 在弹出补全列表后用 <c-p> 或 <c-n> 进行上下选择效果比较好
-
-" -----------------------------------------------------------------------------
-"  < nerdcommenter 插件配置 >
-" -----------------------------------------------------------------------------
-" 我主要用于C/C++代码注释(其它的也行)，这个插件我做了小点修改，也就是在注释符
-" 与注释内容间加一个空格
-" 以下为插件默认快捷键，其中的说明是以C/C++为例的
-" <Leader>ci 以每行一个 /* */ 注释选中行(选中区域所在行)，再输入则取消注释
-" <Leader>cm 以一个 /* */ 注释选中行(选中区域所在行)，再输入则称重复注释
-" <Leader>cc 以每行一个 /* */ 注释选中行或区域，再输入则称重复注释
-" <Leader>cu 取消选中区域(行)的注释，选中区域(行)内至少有一个 /* */
-" <Leader>ca 在/*...*/与//这两种注释方式中切换（其它语言可能不一样了）
-" <Leader>cA 行尾注释
-let NERDSpaceDelims = 1                     "在左注释符之后，右注释符之前留有空格
-
-" -----------------------------------------------------------------------------
-"  < nerdtree 插件配置 >
-" -----------------------------------------------------------------------------
-" 有目录村结构的文件浏览插件
-
-" 常规模式下输入 F2 调用插件
-" nnoremap <F2> :NERDTreeToggle<CR>
-" inoremap <F2> <Esc>:NERDTreeToggle<CR>
-
-" -----------------------------------------------------------------------------
-"  <vim-easymotion插件配置 >
-" -----------------------------------------------------------------------------
-
-" -----------------------------------------------------------------------------
-"  < omnicppcomplete 插件配置 >
-" -----------------------------------------------------------------------------
-" 用于C/C++代码补全，这种补全主要针对命名空间、类、结构、共同体等进行补全，详细
-" 说明可以参考帮助或网络教程等
-" 使用前先执行如下 ctags 命令（本配置中可以直接使用 ccvext 插件来执行以下命令）
-" ctags -R --c++-kinds=+p --fields=+iaS --extra=+q
-" 我使用上面的参数生成标签后，对函数使用跳转时会出现多个选择
-" 所以我就将--c++-kinds=+p参数给去掉了，如果大侠有什么其它解决方法希望不要保留呀
-" set completeopt=menu                        "关闭预览窗口
-
-
-" -----------------------------------------------------------------------------
-"  < powerline 插件配置 >
-" -----------------------------------------------------------------------------
-" 状态栏插件，更好的状态栏效果
-
-" -----------------------------------------------------------------------------
-"  < repeat 插件配置 >
-" -----------------------------------------------------------------------------
-" 主要用"."命令来重复上次插件使用的命令
-
-" -----------------------------------------------------------------------------
-"  < snipMate 插件配置 >
-" -----------------------------------------------------------------------------
-" 用于各种代码补全，这种补全是一种对代码中的词与代码块的缩写补全，详细用法可以参
-" 考使用说明或网络教程等。不过有时候也会与 supertab 插件在补全时产生冲突，如果大
-" 侠有什么其它解决方法希望不要保留呀
-
-" -----------------------------------------------------------------------------
-"  < SrcExpl 插件配置 >
-" -----------------------------------------------------------------------------
-" 增强源代码浏览，其功能就像Windows中的"Source Insight"
-" :SrcExpl                                   "打开浏览窗口
-" :SrcExplClose                              "关闭浏览窗口
-" :SrcExplToggle                             "打开/闭浏览窗口
-
-" " -----------------------------------------------------------------------------
-" "  < supertab 插件配置 >
-" " -----------------------------------------------------------------------------
-" " 我主要用于配合 omnicppcomplete 插件，在按 Tab 键时自动补全效果更好更快
-" let g:SuperTabNoCompleteBefore = [];
- let g:SuperTabNoCompleteAfter = ['^','\s']
-
-let g:SuperTabDefaultCompletionType = "context"
-let g:SuperTabContextDefaultCompletionType = "<c-p>"
-let g:SuperTabCompletionContexts = ['s:ContextText', 's:ContextDiscover']
-let g:SuperTabContextDiscoverDiscovery = ["&completefunc:<c-p>", "&omnifunc:<c-x><c-o>"]
-" Problem with load order (vimrc is evaluated before latex-box setting of omnifunc)
-" \ verbose set omnifunc? | " is empty
-" added this autocommand to after/ftplugin/tex.vim
-" :do FileType solves also the problem
-" autocmd FileType * 
-      " \ if &omnifunc != '' |
-      " \ call SuperTabChain(&omnifunc, "<c-p>") |
-      " \ call SuperTabSetDefaultCompletionType("<c-x><c-u>") |
-      " \ endif
-
-" -----------------------------------------------------------------------------
-"  < std_c 插件配置 >
-" -----------------------------------------------------------------------------
-" 用于增强C语法高亮
-
-" 启用 // 注视风格
-let c_cpp_comments = 0
-
-" -----------------------------------------------------------------------------
-"  < surround 插件配置 >
-" -----------------------------------------------------------------------------
-" 快速给单词/句子两边增加符号（包括html标签），缺点是不能用"."来重复命令
-" 不过 repeat 插件可以解决这个问题，详细帮助见 :h surround.txt
-
-" -----------------------------------------------------------------------------
-"  < Syntastic 插件配置 >
-" -----------------------------------------------------------------------------
-" 用于保存文件是查检语法
-set statusline+=%#warningmsg#
-set statusline+=%{SyntasticStatuslineFlag()}
-set statusline+=%*
-
-let g:syntastic_always_populate_loc_list = 1
-let g:syntastic_auto_jump = 1
-let g:syntastic_auto_loc_list = 1       "default is 0
-let g:syntastic_check_on_open = 1
-let g:syntastic_check_on_wq = 0
-let g:syntastic_cpp_compiler = 'g++5.3'
-let g:syntastic_cpp_compiler_options = ' -std=c++11 '
-
-" no pylint for syntax check
-let g:syntastic_mode_map = {
-    \ "mode": "active",
-    \ "active_filetypes": [],
-    \ "passive_filetypes": ["python"] }
-" no +python compile for vim, so can not use pymode also
-" let g:pymode_lint_on_write = 0
-
-let g:syntastic_enable_perl_checker = 1
-let g:syntastic_perl_checkers=['perl', 'perlcritic', 'podchecker']
-" -----------------------------------------------------------------------------
-"  < Tagbar 插件配置 >
-" -----------------------------------------------------------------------------
-" 相对 TagList 能更好的支持面向对象
-
-" 常规模式下输入 tb 调用插件，如果有打开 TagList 窗口则先将其关闭
-nnoremap tb :TlistClose<cr>:TagbarToggle<cr>
-
-let g:tagbar_width=30                       "设置窗口宽度
-" let g:tagbar_left=1                         "在左侧窗口中显示
-
-" -----------------------------------------------------------------------------
-"  < TagList 插件配置 >
-" -----------------------------------------------------------------------------
-" 高效地浏览源码, 其功能就像vc中的workpace
-" 那里面列出了当前文件中的所有宏,全局变量, 函数名等
-
-" 常规模式下输入 tl 调用插件，如果有打开 Tagbar 窗口则先将其关闭
-nnoremap tl :TagbarClose<cr>:Tlist<cr>
-
-let Tlist_Show_One_File=1                   "只显示当前文件的tags
-" let Tlist_Enable_Fold_Column=0              "使taglist插件不显示左边的折叠行
-let Tlist_Exit_OnlyWindow=1                 "如果Taglist窗口是最后一个窗口则退出Vim
-let Tlist_File_Fold_Auto_Close=1            "自动折叠
-let Tlist_WinWidth=30                       "设置窗口宽度
-let Tlist_Use_Right_Window=1                "在右侧窗口中显示
-
-" -----------------------------------------------------------------------------
-"  < txtbrowser 插件配置 >
-" -----------------------------------------------------------------------------
-" 用于文本文件生成标签与与语法高亮（调用TagList插件生成标签，如果可以）
-au BufRead,BufNewFile *.txt setlocal ft=txt
-
-" " -----------------------------------------------------------------------------
-" "  < WinManager 插件配置 >
-" " -----------------------------------------------------------------------------
-" " 管理各个窗口, 或者说整合各个窗口
-
-" " 常规模式下输入 F3 调用插件
-nnoremap <F3> :WMToggle<cr>
-inoremap <F3> <Esc>:WMToggle<cr>
-
-" " 这里可以设置为多个窗口, 如'FileExplorer|TagList'
-" let g:winManagerWindowLayout='FileExplorer'
-
-" let g:persistentBehaviour=0                 "只剩一个窗口时, 退出vim
-" let g:winManagerWidth=30                    "设置窗口宽度
-
-" -----------------------------------------------------------------------------
-"  < ZoomWin 插件配置 >
-" -----------------------------------------------------------------------------
-" 用于分割窗口的最大化与还原
-" 快捷键 <c-w>o 在最大化与还原间切换
-
-" =============================================================================
-"                          << 以下为常用工具配置 >>
-" =============================================================================
-
-" -----------------------------------------------------------------------------
-"  < cscope 工具配置 >
-" -----------------------------------------------------------------------------
-" 用Cscope自己的话说 - "你可以把它当做是超过频的ctags"
 if has("cscope")
-    "设定可以使用 quickfix 窗口来查看 cscope 结果
     set cscopequickfix=s-,c-,d-,i-,t-,e-
-    "使支持用 Ctrl+]  和 Ctrl+t 快捷键在代码间跳转
     set cscopetag
-    "如果你想反向搜索顺序设置为1
     set csto=0
-    "在当前目录中添加任何数据库
     if filereadable("cscope.out")
         cs add cscope.out
-        "否则添加数据库环境中所指出的
     elseif $CSCOPE_DB != ""
         cs add $CSCOPE_DB
     endif
@@ -1005,34 +762,465 @@ if has("cscope")
     nmap <C-\>d :cs find d <C-R>=expand("<cword>")<CR><CR>
 endif
 
-" -----------------------------------------------------------------------------
-"  < ctags 工具配置 >
-" -----------------------------------------------------------------------------
-" 对浏览代码非常的方便,可以在函数,变量之间跳转等
-set tags=./tags;                            "向上级目录递归查找tags文件（好像只有在Windows下才有用）
 
-" -----------------------------------------------------------------------------
-"  < gvimfullscreen 工具配置 > 请确保已安装了工具
-" -----------------------------------------------------------------------------
-" 用于 Windows Gvim 全屏窗口，可用 F11 切换
-" 全屏后再隐藏菜单栏、工具栏、滚动条效果更好
-if (g:iswindows && g:isGUI)
-    map <F11> <Esc>:call libcallnr("gvimfullscreen.dll", "ToggleFullScreen", 0)<CR>
+" }}}2
+"  < ctags > {{{2
+
+set tags=./tags
+
+
+
+" }}}2
+"  < others > {{{2
+" }}}2
+" }}}1
+"             << ------------ Plug Begin >> {{{1
+" Use Vim settings, rather than Vi settings (much better!).
+" This must be first, because it changes other options as a side effect.
+" filetype off
+
+" " for Vundle
+" if !g:iswindows
+"     set rtp+=~/.vim/bundle/Vundle.vim
+"     call vundle#begin()
+" else
+"     set rtp+=$VIM/vimfiles/bundle/vundle.vim/
+"     call vundle#begin('$VIM/vimfiles/bundle/')
+" endif
+" set the runtime path to include Vundle and initialize
+" alternatively, pass a path where Vundle should install plugins
+"call vundle#begin('~/some/path/here')
+
+" " let Vundle manage Vundle, required
+" Plugin 'VundleVim/Vundle.vim'
+if empty(glob('~/.vim/autoload/plug.vim'))
+    silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
+                \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+    autocmd VimEnter * PlugInstall | source $MYVIMRC
 endif
 
-" =============================================================================
-"                          << 以下为常用自动命令配置 >>
-" =============================================================================
+call plug#begin('~/.vim/bundle')
+" The following are examples of different formats supported.
+" Keep Plugin commands between vundle#begin/end.
+" plugin on GitHub repo
+" }}}1
+"  < vim-fugitive > {{{1
 
-" 自动切换目录为当前编辑文件所在目录
-" if g:isGUI
-    au BufRead,BufNewFile,BufEnter * cd %:p:h
-" endif
+Plug 'tpope/vim-fugitive'
+" fugitive git bindings
 
-" =============================================================================
-"                          << 其它 >>
-" =============================================================================
+nnoremap <space>ga :Git add %:p<CR><CR>
+nnoremap <Space>gb :Gblame<CR>
+" nnoremap <space>gb :Git branch<Space>
+nnoremap <space>gc :Gcommit -v -q<CR>
+nnoremap <Space>gd :Gdiff<CR>
+nnoremap <space>ge :Gedit<CR>
+nnoremap <space>gm :Gmove<Space>
+nnoremap <space>go :Git checkout<Space>
+nnoremap <space>gps :Dispatch! git push<CR>
+nnoremap <space>gpl :Dispatch! git pull<CR>
+nnoremap <Space>gs :Gstatus<CR>
+nnoremap <space>gt :Gcommit -v -q %:p<CR>
+" nnoremap <space>gL :exe ':!cd ' . expand('%:p:h') . '; git la'<CR>
+" nnoremap <space>gl :exe ':!cd ' . expand('%:p:h') . '; git las'<CR>
+" nnoremap <space>gl :silent! Glog<CR>:bot copen<CR>
+nnoremap <space>gl :silent Glog<CR>
+nnoremap <space>gL :silent Glog<CR>:set nofoldenable<CR>
+nnoremap <space>gr :Gread<CR>
+nnoremap <space>gw :Gwrite<CR>
+" nnoremap <space>gw :Gwrite<CR><CR>
+nnoremap <space>gp :Git push<CR>
+" nnoremap <space>gp :Ggrep<Space>
+nnoremap <space>g- :Silent Git stash<CR>:e<CR>
+nnoremap <space>g+ :Silent Git stash pop<CR>:e<CR>
 
-" 注：上面配置中的"<Leader>"在本软件中设置为"\"键（引号里的反斜杠），如<Leader>t
-" 指在常规模式下按"\"键加"t"键，这里不是同时按，而是先按"\"键后按"t"键，间隔在一
- " 秒内，而<Leader>cs是先按"\"键再按"c"又再按"s"键
+
+" }}}1
+"  < vim-grep-operator > {{{1
+Plug 'ykwoshia/vim-grep-operator'
+" }}}1
+"  < unimpaired.vim > {{{1
+Plug 'tpope/vim-unimpaired'
+" }}}1
+"  < junegunn/gv.vim > {{{1
+Plug 'junegunn/gv.vim'
+" }}}1
+" < L9 > {{{1
+Plug 'vim-scripts/L9'
+" }}}1
+" < LineJuggler > {{{1
+Plug 'vim-scripts/LineJuggler'
+" }}}1
+" < ingo-library > {{{1
+Plug 'inkarkat/vim-ingo-library'
+" }}}1
+"  < Align > {{{1
+Plug 'junegunn/vim-easy-align'
+" }}}1
+"  < fzf > {{{1
+" Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all'  }
+" Plug 'junegunn/fzf.vim'
+" }}}1
+"  < vim-expand-region > {{{1
+
+Plug 'terryma/vim-expand-region'
+vmap v <Plug>(expand_region_expand)
+vmap <C-v> <Plug>(expand_region_shrink)
+
+
+" }}}1
+"  < neocomplete.vim > {{{1
+
+if has("lua")
+    Plug 'Shougo/neocomplete.vim'
+    " Note: This option must be set in .vimrc(_vimrc).  NOT IN .gvimrc(_gvimrc)!
+    " Disable AutoComplPop.
+    let g:acp_enableAtStartup = 0
+    " Use neocomplete.
+    let g:neocomplete#enable_at_startup = 1
+    " Use smartcase.
+    let g:neocomplete#enable_smart_case = 1
+    " Set minimum syntax keyword length.
+    let g:neocomplete#sources#syntax#min_keyword_length = 3
+    let g:neocomplete#lock_buffer_name_pattern = '\*ku\*'
+
+    " Define dictionary.
+    let g:neocomplete#sources#dictionary#dictionaries = {
+                \ 'default' : '',
+                \ 'vimshell' : $HOME.'/.vimshell_hist',
+                \ 'scheme' : $HOME.'/.gosh_completions'
+                \ }
+
+    " Define keyword.
+    if !exists('g:neocomplete#keyword_patterns')
+        let g:neocomplete#keyword_patterns = {}
+    endif
+    let g:neocomplete#keyword_patterns['default'] = '\h\w*'
+
+    " Plugin key-mappings.
+    inoremap <expr><C-g>     neocomplete#undo_completion()
+    inoremap <expr><C-l>     neocomplete#complete_common_string()
+
+    " Recommended key-mappings.
+    " <CR>: close popup and save indent.
+    inoremap <silent> <CR> <C-r>=<SID>my_cr_function()<CR>
+    function! s:my_cr_function()
+        return (pumvisible() ? "\<C-y>" : "" ) . "\<CR>"
+        " For no inserting <CR> key.
+        "return pumvisible() ? "\<C-y>" : "\<CR>"
+    endfunction
+    " <TAB>: completion.
+    inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
+    " <C-h>, <BS>: close popup and delete backword char.
+    inoremap <expr><C-h> neocomplete#smart_close_popup()."\<C-h>"
+    inoremap <expr><BS> neocomplete#smart_close_popup()."\<C-h>"
+    " Close popup by <Space>.
+    "inoremap <expr><Space> pumvisible() ? "\<C-y>" : "\<Space>"
+
+    " AutoComplPop like behavior.
+    "let g:neocomplete#enable_auto_select = 1
+
+    " Shell like behavior(not recommended).
+    "set completeopt+=longest
+    "let g:neocomplete#enable_auto_select = 1
+    "let g:neocomplete#disable_auto_complete = 1
+    "inoremap <expr><TAB>  pumvisible() ? "\<Down>" : "\<C-x>\<C-u>"
+
+    " Enable omni completion.
+    autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
+    autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
+    autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
+    " autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
+    autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
+
+    " Enable heavy omni completion.
+    if !exists('g:neocomplete#sources#omni#input_patterns')
+        let g:neocomplete#sources#omni#input_patterns = {}
+    endif
+    "let g:neocomplete#sources#omni#input_patterns.php = '[^. \t]->\h\w*\|\h\w*::'
+    "let g:neocomplete#sources#omni#input_patterns.c = '[^.[:digit:] *\t]\%(\.\|->\)'
+    "let g:neocomplete#sources#omni#input_patterns.cpp = '[^.[:digit:] *\t]\%(\.\|->\)\|\h\w*::'
+
+    " For perlomni.vim setting.
+    " https://github.com/c9s/perlomni.vim
+    let g:neocomplete#sources#omni#input_patterns.perl = '\h\w*->\h\w*\|\h\w*::'
+" else
+    " Plug '~/.vim/bundle/neocomplcache'
+    " Plug 'neocomplcache'
+    " let g:neocomplcache_enable_at_startup = 1
+    " let g:neocomplcache_disable_auto_complete = 1
+endif
+
+
+" }}}1
+"  < txtbrowser > {{{1
+
+
+
+
+" }}}1
+"  < ctrlp > {{{1
+
+Plug 'kien/ctrlp.vim'
+let g:ctrlp_working_path_mode = 's'
+
+
+" }}}1
+"  < vim-auto-save > {{{1
+
+Plug '907th/vim-auto-save'
+set updatetime=2000
+let g:auto_save=1
+let g:auto_save_silent=1
+let g:auto_save_events = ["CursorHold"]
+
+
+" }}}1
+"  < vim-move > {{{1
+
+Plug 'matze/vim-move'
+
+
+" }}}1
+Plug 'ervandew/supertab'
+" let g:SuperTabNoCompleteBefore = [];
+let g:SuperTabNoCompleteAfter = ['^','\s']
+
+let g:SuperTabDefaultCompletionType = "context"
+let g:SuperTabContextDefaultCompletionType = "<c-p>"
+let g:SuperTabCompletionContexts = ['s:ContextText', 's:ContextDiscover']
+let g:SuperTabContextDiscoverDiscovery = ["&completefunc:<c-p>", "&omnifunc:<c-x><c-o>"]
+" Problem with load order (vimrc is evaluated before latex-box setting of omnifunc)
+" \ verbose set omnifunc? | " is empty
+" added this autocommand to after/ftplugin/tex.vim
+" :do FileType solves also the problem
+" autocmd FileType *
+" \ if &omnifunc != '' |
+" \ call SuperTabChain(&omnifunc, "<c-p>") |
+" \ call SuperTabSetDefaultCompletionType("<c-x><c-u>") |
+" \ endif
+
+
+" }}}1
+"  < auto-pairs > {{{1
+
+Plug 'jiangmiao/auto-pairs'
+
+
+" }}}1
+"  < vim-sneak > {{{1
+
+Plug 'justinmk/vim-sneak'
+"replace 'f' with 1-char Sneak
+nmap f <Plug>Sneak_f
+nmap F <Plug>Sneak_F
+xmap f <Plug>Sneak_f
+xmap F <Plug>Sneak_F
+omap f <Plug>Sneak_f
+omap F <Plug>Sneak_F
+"replace 't' with 1-char Sneak
+nmap t <Plug>Sneak_t
+nmap T <Plug>Sneak_T
+xmap t <Plug>Sneak_t
+xmap T <Plug>Sneak_T
+omap t <Plug>Sneak_t
+omap T <Plug>Sneak_T
+
+" nmap ' <Plug>SneakNext
+
+let g:sneak#streak = 1
+let g:sneak#use_ic_scs = 1
+"  " not very useful
+"  " Plug 'justinmk/vim-dirvish'
+" color
+" hi link SneakPluginTarget Type
+" hi link SneakPluginScope Function
+" hi link SneakStreakTarget Type
+hi link SneakStreakMask Text
+hi SneakPluginTarget guifg=black guibg=yellow ctermfg=black ctermbg=yellow
+hi SneakStreakTarget guifg=black guibg=blue ctermfg=black ctermbg=blue
+" hi SneakStreakMask guifg=white guibg=black ctermfg=white ctermbg=black
+" hi SneakPluginScope  guifg=black guibg=yellow ctermfg=black ctermbg=yellow
+
+" }}}1
+"  < vim-easymotion > {{{1
+
+" Plug 'easymotion/vim-easymotion'
+" " map <Space> <Plug>(easymotion-prefix)
+" map <Space> <Plug>(easymotion-prefix)
+" " map f <Plug>(easymotion-prefix)
+" "    <Plug> Mapping Table | Default
+" "    ---------------------|----------------------------------------------
+" "    <Plug>(easymotion-f) | <Leader>f{char}
+" "    <Plug>(easymotion-F) | <Leader>F{char}
+" "    <Plug>(easymotion-t) | <Leader>t{char}
+" "    <Plug>(easymotion-T) | <Leader>T{char}
+" "    <Plug>(easymotion-w) | <Leader>w
+" "    <Plug>(easymotion-W) | <Leader>W
+" "    <Plug>(easymotion-b) | <Leader>b
+" "    <Plug>(easymotion-B) | <Leader>B
+" "    <Plug>(easymotion-e) | <Leader>e
+" "    <Plug>(easymotion-E) | <Leader>E
+" "    <Plug>(easymotion-ge)| <Leader>ge
+" "    <Plug>(easymotion-gE)| <Leader>gE
+" "    <Plug>(easymotion-j) | <Leader>j
+" "    <Plug>(easymotion-k) | <Leader>k
+" "    <Plug>(easymotion-n) | <Leader>n
+" "    <Plug>(easymotion-N) | <Leader>N
+" "    <Plug>(easymotion-s) | <Leader>s
+" 
+" " <Leader>f{char} to move to {char}
+" " map  <Leader>f <Plug>(easymotion-bd-f)
+" " nmap <Leader>f <Plug>(easymotion-overwin-f)
+" " map  f <Plug>(easymotion-bd-f)
+" " nmap F <Plug>(easymotion-overwin-f)
+" 
+" " s{char}{char} to move to {char}{char}
+" " nmap <Leader>s <Plug>(easymotion-overwin-f2)
+" " Require tpope/vim-repeat to enable dot repeat support
+" " Jump to anywhere with only `s{char}{target}`
+" " `s<CR>` repeat last find motion.
+" " nmap s <Plug>(easymotion-s)
+" " Bidirectional & within line 't' motion
+" " map <Space><Space>  <Plug>(easymotion-bd-jk)
+" map <Space>h        <Plug>(easymotion-linebackward)
+" map <Space>l        <Plug>(easymotion-lineforward)
+" 
+" " Gif config
+" " map  / <Plug>(easymotion-sn)
+" " omap / <Plug>(easymotion-tn)
+" 
+" " These `n` & `N` mappings are options. You do not have to map `n` & `N` to EasyMotion.
+" " Without these mappings, `n` & `N` works fine. (These mappings just provide
+" " different highlight method and have some other features )
+" " map  n <Plug>(easymotion-next)
+" " map  N <Plug>(easymotion-prev)
+" 
+" let g:EasyMotion_smartcase = 1
+" let g:EasyMotion_enter_jump_first = 1
+" 
+" 
+" " }}}1
+"  < Tagbar > {{{1
+
+Plug 'majutsushi/tagbar'
+nnoremap tb :TlistClose<cr>:TagbarToggle<cr>
+
+let g:tagbar_width=30
+" let g:tagbar_left=1
+" }}}1
+"  < snipmate.vim > {{{1
+Plug 'ervandew/snipmate.vim'
+" }}}1
+"  < python-mode > {{{1
+Plug 'python-mode/python-mode'
+" }}}1
+"  < vim-repeat > {{{1
+Plug 'tpope/vim-repeat'
+" }}}1
+"  < visualrepeat > {{{1
+Plug 'vim-scripts/visualrepeat'
+" }}}1
+"  < nerdcommenter > {{{1
+
+Plug 'scrooloose/nerdcommenter'
+let NERDSpaceDelims = 1
+
+Plug 'scrooloose/nerdtree'
+
+
+" }}}1
+ " < repmo.vim > {{{1
+Plug 'vim-scripts/repmo.vim'
+" }}}1
+"  < Syntastic > {{{1
+
+Plug 'scrooloose/syntastic'
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()} "show error in ubuntu
+set statusline+=%*
+
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_jump = 1
+let g:syntastic_auto_loc_list = 1       "default is 0
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 0
+
+if has("lua")
+    let g:syntastic_cpp_compiler = 'g++'
+else
+    let g:syntastic_cpp_compiler = 'g++5.3'
+endif
+
+let g:syntastic_cpp_compiler_options = ' -std=c++11 '
+
+" no pylint for syntax check
+let g:syntastic_mode_map = {
+            \ "mode": "active",
+            \ "active_filetypes": [] }
+" , \ "passive_filetypes": ["python"] }
+" no +python compile for vim, so can not use pymode also
+" let g:pymode_lint_on_write = 0
+
+let g:syntastic_enable_rust_checker = 1
+let g:syntastic_rust_checkers = ['rustc']
+
+let g:syntastic_enable_perl_checker = 1
+let g:syntastic_perl_checkers = ['perl', 'perlcritic', 'podchecker']
+
+" let g:syntastic_enable_java_checker = 1
+" let g:syntastic_java_checker = 'javac'
+" let g:syntastic_java_javac_classpath = 'javac'
+" use eclim for java syntax check
+let g:EclimJavaValidate = 1
+" }}}1
+"  < vim-sdcv > {{{1
+Plug 'chusiang/vim-sdcv'
+nmap <space>w :call SearchWord()<CR>
+" set keywordprg='sdcv'
+" }}}1
+"  < vim-surround > {{{1
+Plug 'tpope/vim-surround'
+" }}}1
+ " < vim-airline > {{{1
+Plug 'vim-airline/vim-airline'
+let g:airline_powerline_fonts=1
+let g:airline_theme='tomorrow'
+let g:airline#extensions#tabline#enabled=1
+let g:airline#extensions#tabline#buffer_idx_mode = 1
+nmap <leader>1 <Plug>AirlineSelectTab1
+nmap <leader>2 <Plug>AirlineSelectTab2
+nmap <leader>3 <Plug>AirlineSelectTab3
+nmap <leader>4 <Plug>AirlineSelectTab4
+nmap <leader>5 <Plug>AirlineSelectTab5
+nmap <leader>6 <Plug>AirlineSelectTab6
+nmap <leader>7 <Plug>AirlineSelectTab7
+nmap <leader>8 <Plug>AirlineSelectTab8
+nmap <leader>9 <Plug>AirlineSelectTab9
+nmap <leader>- <Plug>AirlineSelectPrevTab
+nmap <leader>\ <Plug>AirlineSelectNextTab
+" nmap - <Plug>AirlineSelectPrevTab
+" nmap + <Plug>AirlineSelectNextTab
+let g:airline#extensions#tabline#show_buffers = 1
+let g:airline#extensions#tabline#buffer_min_count = 2
+" let g:airline#extensions#tabline#tab_min_count = 2
+let g:airline#extensions#tabline#keymap_ignored_filetypes = ['vimfiler', 'nerdtree', 'quickfix', 'rst']
+let g:airline#extensions#tabline#excludes = ['__doc__']
+Plug 'vim-airline/vim-airline-themes'
+" install fonts
+" clone
+" git clone https://github.com/powerline/fonts.git --depth=1
+" install
+" cd fonts
+" ./install.sh
+" }}}1
+"  < Mark--Karkat > {{{1
+Plug 'vim-scripts/Mark--Karkat'
+
+
+" }}}1
+"             << ------------ Plug End >> {{{1
+call plug#end()            " required
+
+" }}}1
+
