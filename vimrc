@@ -183,7 +183,7 @@ endif
 
 " ------------ font
 if g:iswindows
-    set guifont=Source_Code_Pro:h11
+    " set guifont=Source_Code_Pro:h11
     " set guifont=YaHei_Consolas_Hybrid:h10
 else
     if g:isGUI
@@ -192,9 +192,9 @@ else
 
         else
             if has("mac")
-                set guifont=Source\ Code\ Pro:h16
+                " set guifont=Source\ Code\ Pro:h16
             else
-                set guifont=BitstreamVeraSansMono\ 11
+                " set guifont=BitstreamVeraSansMono\ 11
             endif
         endif
     endif
@@ -356,10 +356,11 @@ iab teh the
 "  < Leader Key Mapping > {{{1
 
 
-let mapleader = "'"
+" let mapleader = "'"
 " let maplocalleader = "-"
 " map <Space> <Leader>
 " let mapleader = "\<Space>"
+nnoremap <Space> :
 
 map <Space><Space> <Plug>NERDCommenterToggle
 
@@ -383,19 +384,19 @@ nnoremap <Space>[ m`:silent -g/\m^\s*$/d<CR>``:noh<CR>
 if findfile("Makefile") == "Makefile"
     if g:isGUI
         nnoremap <Leader>e :update<CR>:!make && ./out<CR>
-        nnoremap <Space>e :update<CR>:!make && ./out<CR>
+        " nnoremap <Space>e :update<CR>:!make && ./out<CR>
     else
         nnoremap <Leader>e :update<CR>:S make && ./out<CR>
-        nnoremap <Space>e :update<CR>:S make && ./out<CR>
+        " nnoremap <Space>e :update<CR>:S make && ./out<CR>
     endif
 else
     " todo how to run in shell use % 10/16/16
     if g:isGUI
         nnoremap <Leader>e :update<CR>:!./%<CR>
-        nnoremap <Space>e :update<CR>:!./%<CR>
+        " nnoremap <Space>e :update<CR>:!./%<CR>
     else
         nnoremap <Leader>e :update<CR>:S ./*.pl*<CR>
-        nnoremap <Space>e :update<CR>:S ./*.pl*<CR>
+        " nnoremap <Space>e :update<CR>:S ./*.pl*<CR>
     endif
 endif
 " nnoremap <Leader>e :update<CR>:!make<CR>
@@ -432,9 +433,11 @@ nnoremap <Leader>sl :redraw!<CR>
 nnoremap <Leader>so :source $MYVIMRC<CR>:AirlineRefresh<CR>
 
 " "T
-nnoremap <Space>t :NERDTreeToggle<CR>
+" nnoremap <Space>t :NERDTreeToggle<CR>
+nnoremap <F3> :NERDTreeToggle<CR>
+inoremap <F3> <Esc>:NERDTreeToggle<CR>
 " V
-nnoremap <Space>v :e ~/.vimrc<CR>
+" nnoremap <Space>v :e ~/.vimrc<CR>
 " "W
 nnoremap <Leader>w <Esc>:wq<CR>
 " "X
@@ -544,8 +547,8 @@ if !  g:isGUI
 endif
 " " " A-A
 " map <A-a> <Plug>NERDCommenterToggle
-nnoremap <A-a> A;<Esc>
-inoremap <A-a> <Esc>A;<Esc>
+nnoremap <A-a> A:<CR>
+inoremap <A-a> <Esc>A:<CR>
 
 " " " A-B
 " nnoremap <A-b> :update<CR>:!make<CR>
@@ -571,8 +574,10 @@ vnoremap <A-D> "_dk
 "
 " " " A-E
 "auto-pair occupy
+
 " " " A-F
-"
+nnoremap <A-f> :vs<cr>gf<cr>
+
 " " " A-G
 "
 " " A-H
@@ -631,6 +636,11 @@ nnoremap <A-Q> :q<CR>
 inoremap <A-Q> <Esc>:q<CR>
 vnoremap <A-Q> <Esc>:q<CR>
 
+" " A-R
+nnoremap <A-r> :update<CR>:!python %<CR>
+inoremap <A-r> <Esc>:update<CR>:!python %<CR>
+vnoremap <A-r> <Esc>:!python %<CR>
+
 " " A-S
 " map <A-s> <Esc>:update<CR>
 nnoremap <A-s> :update<CR>
@@ -649,6 +659,7 @@ vnoremap <A-S> <Esc>:update<CR>
 " inoremap <A-U> <Esc>ui
 "
 " " " A-V
+nnoremap <A-v> :e ~/.vimrc<CR>
 " paste from clipboard
 " inoremap <A-v> <Esc>"+p
 " nnoremap <A-v> <Esc>"+p
@@ -675,9 +686,11 @@ nnoremap <A-y> yyp
 nnoremap <A-Y> yyP
 vnoremap <A-y> y`>p
 vnoremap <A-Y> y`<P
-inoremap <A-y> <C-O>yyp
-inoremap <A-Y> <C-O>yyP
-"
+" inoremap <A-y> <C-O>yyp
+" inoremap <A-Y> <C-O>yyP
+inoremap <A-y> <Esc>yyp
+inoremap <A-Y> <Esc>yyP
+
 " " " A-Z
 
 " }}}1
@@ -701,25 +714,30 @@ if exists('$TMUX')
     let &t_te = "\<Esc>]2;". previous_title . "\<Esc>\\" . &t_te
 
     " for cursor sharp
-    if has("lua") || has("mac")
-        let &t_SI = "\<Esc>Ptmux;\<Esc>\e[5 q\<Esc>\\"
-        let &t_EI = "\<Esc>Ptmux;\<Esc>\e[2 q\<Esc>\\"
-    endif
+    " if has("lua") || has("mac")
+        " let &t_SI = "\<Esc>Ptmux;\<Esc>\e[5 q\<Esc>\\"
+        " let &t_EI = "\<Esc>Ptmux;\<Esc>\e[2 q\<Esc>\\"
+    " endif
+    " Konsole
     " let &t_EI = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=0\x7\<Esc>\\"
     " let &t_SI = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=1\x7\<Esc>\\"
+    " let &t_SR = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=2\x7\<Esc>\\"
 
     nnoremap <silent> <C-h> :call TmuxOrSplitSwitch('h', 'L')<cr>
     nnoremap <silent> <C-j> :call TmuxOrSplitSwitch('j', 'D')<cr>
     nnoremap <silent> <C-k> :call TmuxOrSplitSwitch('k', 'U')<cr>
     nnoremap <silent> <C-l> :call TmuxOrSplitSwitch('l', 'R')<cr>
 else
+    " Konsole
+    " let &t_SI="\<Esc>]50;CursorShape=1\x7"
+    " let &t_SR="\<Esc>]50;CursorShape=2\x7"
+    " let &t_EI="\<Esc>]50;CursorShape=0\x7"
 
     map <C-h> <C-w>h
     map <C-j> <C-w>j
     map <C-k> <C-w>k
     map <C-l> <C-w>l
 endif
-
 
 " }}}2
 "  < cscope > {{{2
@@ -834,6 +852,9 @@ Plug 'vim-scripts/L9'
 " < LineJuggler > {{{1
 Plug 'vim-scripts/LineJuggler'
 " }}}1
+" < ingo-library > {{{1
+Plug 'inkarkat/vim-ingo-library'
+" }}}1
 "  < Align > {{{1
 Plug 'junegunn/vim-easy-align'
 " }}}1
@@ -910,7 +931,7 @@ if has("lua")
     autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
     autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
     autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
-    autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
+    " autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
     autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
 
     " Enable heavy omni completion.
@@ -1025,76 +1046,81 @@ hi SneakStreakTarget guifg=black guibg=blue ctermfg=black ctermbg=blue
 " }}}1
 "  < vim-easymotion > {{{1
 
-Plug 'easymotion/vim-easymotion'
+" Plug 'easymotion/vim-easymotion'
+" " map <Space> <Plug>(easymotion-prefix)
 " map <Space> <Plug>(easymotion-prefix)
-map <Space> <Plug>(easymotion-prefix)
-" map f <Plug>(easymotion-prefix)
-"    <Plug> Mapping Table | Default
-"    ---------------------|----------------------------------------------
-"    <Plug>(easymotion-f) | <Leader>f{char}
-"    <Plug>(easymotion-F) | <Leader>F{char}
-"    <Plug>(easymotion-t) | <Leader>t{char}
-"    <Plug>(easymotion-T) | <Leader>T{char}
-"    <Plug>(easymotion-w) | <Leader>w
-"    <Plug>(easymotion-W) | <Leader>W
-"    <Plug>(easymotion-b) | <Leader>b
-"    <Plug>(easymotion-B) | <Leader>B
-"    <Plug>(easymotion-e) | <Leader>e
-"    <Plug>(easymotion-E) | <Leader>E
-"    <Plug>(easymotion-ge)| <Leader>ge
-"    <Plug>(easymotion-gE)| <Leader>gE
-"    <Plug>(easymotion-j) | <Leader>j
-"    <Plug>(easymotion-k) | <Leader>k
-"    <Plug>(easymotion-n) | <Leader>n
-"    <Plug>(easymotion-N) | <Leader>N
-"    <Plug>(easymotion-s) | <Leader>s
-
-" <Leader>f{char} to move to {char}
-" map  <Leader>f <Plug>(easymotion-bd-f)
-" nmap <Leader>f <Plug>(easymotion-overwin-f)
-" map  f <Plug>(easymotion-bd-f)
-" nmap F <Plug>(easymotion-overwin-f)
-
-" s{char}{char} to move to {char}{char}
-" nmap <Leader>s <Plug>(easymotion-overwin-f2)
-" Require tpope/vim-repeat to enable dot repeat support
-" Jump to anywhere with only `s{char}{target}`
-" `s<CR>` repeat last find motion.
-" nmap s <Plug>(easymotion-s)
-" Bidirectional & within line 't' motion
-" map <Space><Space>  <Plug>(easymotion-bd-jk)
-map <Space>h        <Plug>(easymotion-linebackward)
-map <Space>l        <Plug>(easymotion-lineforward)
-
-" Gif config
-" map  / <Plug>(easymotion-sn)
-" omap / <Plug>(easymotion-tn)
-
-" These `n` & `N` mappings are options. You do not have to map `n` & `N` to EasyMotion.
-" Without these mappings, `n` & `N` works fine. (These mappings just provide
-" different highlight method and have some other features )
-" map  n <Plug>(easymotion-next)
-" map  N <Plug>(easymotion-prev)
-
-let g:EasyMotion_smartcase = 1
-let g:EasyMotion_enter_jump_first = 1
-
-
-" }}}1
+" " map f <Plug>(easymotion-prefix)
+" "    <Plug> Mapping Table | Default
+" "    ---------------------|----------------------------------------------
+" "    <Plug>(easymotion-f) | <Leader>f{char}
+" "    <Plug>(easymotion-F) | <Leader>F{char}
+" "    <Plug>(easymotion-t) | <Leader>t{char}
+" "    <Plug>(easymotion-T) | <Leader>T{char}
+" "    <Plug>(easymotion-w) | <Leader>w
+" "    <Plug>(easymotion-W) | <Leader>W
+" "    <Plug>(easymotion-b) | <Leader>b
+" "    <Plug>(easymotion-B) | <Leader>B
+" "    <Plug>(easymotion-e) | <Leader>e
+" "    <Plug>(easymotion-E) | <Leader>E
+" "    <Plug>(easymotion-ge)| <Leader>ge
+" "    <Plug>(easymotion-gE)| <Leader>gE
+" "    <Plug>(easymotion-j) | <Leader>j
+" "    <Plug>(easymotion-k) | <Leader>k
+" "    <Plug>(easymotion-n) | <Leader>n
+" "    <Plug>(easymotion-N) | <Leader>N
+" "    <Plug>(easymotion-s) | <Leader>s
+" 
+" " <Leader>f{char} to move to {char}
+" " map  <Leader>f <Plug>(easymotion-bd-f)
+" " nmap <Leader>f <Plug>(easymotion-overwin-f)
+" " map  f <Plug>(easymotion-bd-f)
+" " nmap F <Plug>(easymotion-overwin-f)
+" 
+" " s{char}{char} to move to {char}{char}
+" " nmap <Leader>s <Plug>(easymotion-overwin-f2)
+" " Require tpope/vim-repeat to enable dot repeat support
+" " Jump to anywhere with only `s{char}{target}`
+" " `s<CR>` repeat last find motion.
+" " nmap s <Plug>(easymotion-s)
+" " Bidirectional & within line 't' motion
+" " map <Space><Space>  <Plug>(easymotion-bd-jk)
+" map <Space>h        <Plug>(easymotion-linebackward)
+" map <Space>l        <Plug>(easymotion-lineforward)
+" 
+" " Gif config
+" " map  / <Plug>(easymotion-sn)
+" " omap / <Plug>(easymotion-tn)
+" 
+" " These `n` & `N` mappings are options. You do not have to map `n` & `N` to EasyMotion.
+" " Without these mappings, `n` & `N` works fine. (These mappings just provide
+" " different highlight method and have some other features )
+" " map  n <Plug>(easymotion-next)
+" " map  N <Plug>(easymotion-prev)
+" 
+" let g:EasyMotion_smartcase = 1
+" let g:EasyMotion_enter_jump_first = 1
+" 
+" 
+" " }}}1
 "  < Tagbar > {{{1
 
+Plug 'majutsushi/tagbar'
 nnoremap tb :TlistClose<cr>:TagbarToggle<cr>
 
 let g:tagbar_width=30
 " let g:tagbar_left=1
-
-Plug 'majutsushi/tagbar'
-" Plug 'minibufexpl.vim'
+" }}}1
+"  < snipmate.vim > {{{1
 Plug 'ervandew/snipmate.vim'
-" Plug 'klen/python-mode'
+" }}}1
+"  < python-mode > {{{1
+Plug 'python-mode/python-mode'
+" }}}1
+"  < vim-repeat > {{{1
 Plug 'tpope/vim-repeat'
-
-
+" }}}1
+"  < visualrepeat > {{{1
+Plug 'vim-scripts/visualrepeat'
 " }}}1
 "  < nerdcommenter > {{{1
 
@@ -1149,11 +1175,45 @@ let g:syntastic_perl_checkers = ['perl', 'perlcritic', 'podchecker']
 " use eclim for java syntax check
 let g:EclimJavaValidate = 1
 " }}}1
+"  < vim-sdcv > {{{1
+Plug 'chusiang/vim-sdcv'
+nmap <space>w :call SearchWord()<CR>
+" set keywordprg='sdcv'
+" }}}1
 "  < vim-surround > {{{1
 Plug 'tpope/vim-surround'
 " }}}1
  " < vim-airline > {{{1
 Plug 'vim-airline/vim-airline'
+let g:airline_powerline_fonts=1
+let g:airline_theme='tomorrow'
+let g:airline#extensions#tabline#enabled=1
+let g:airline#extensions#tabline#buffer_idx_mode = 1
+nmap <leader>1 <Plug>AirlineSelectTab1
+nmap <leader>2 <Plug>AirlineSelectTab2
+nmap <leader>3 <Plug>AirlineSelectTab3
+nmap <leader>4 <Plug>AirlineSelectTab4
+nmap <leader>5 <Plug>AirlineSelectTab5
+nmap <leader>6 <Plug>AirlineSelectTab6
+nmap <leader>7 <Plug>AirlineSelectTab7
+nmap <leader>8 <Plug>AirlineSelectTab8
+nmap <leader>9 <Plug>AirlineSelectTab9
+nmap <leader>- <Plug>AirlineSelectPrevTab
+nmap <leader>\ <Plug>AirlineSelectNextTab
+" nmap - <Plug>AirlineSelectPrevTab
+" nmap + <Plug>AirlineSelectNextTab
+let g:airline#extensions#tabline#show_buffers = 1
+let g:airline#extensions#tabline#buffer_min_count = 2
+" let g:airline#extensions#tabline#tab_min_count = 2
+let g:airline#extensions#tabline#keymap_ignored_filetypes = ['vimfiler', 'nerdtree', 'quickfix', 'rst']
+let g:airline#extensions#tabline#excludes = ['__doc__']
+Plug 'vim-airline/vim-airline-themes'
+" install fonts
+" clone
+" git clone https://github.com/powerline/fonts.git --depth=1
+" install
+" cd fonts
+" ./install.sh
 " }}}1
 "  < Mark--Karkat > {{{1
 Plug 'vim-scripts/Mark--Karkat'
