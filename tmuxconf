@@ -82,6 +82,7 @@ bind -n M-h previous-window
 bind -n M-l next-window
 bind -n M-< swap-window -t -1
 bind -n M-> swap-window -t +1
+bind -n M-q run "(tmux display-message -p '#{pane_title}' | grep -iq '^vim$' && tmux send-keys M-q) || tmux kill-pane"
 
 # default window title colors
 set-window-option -g window-status-current-fg colour166
