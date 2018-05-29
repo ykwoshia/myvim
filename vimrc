@@ -200,6 +200,9 @@ else
     endif
 endif
 
+" dictionary
+set dictionary+=/usr/share/dict/words
+set complete+=k
 " ------------ mouse
 " can not use in mac and redhat
 " set mouse=a
@@ -452,7 +455,9 @@ nnoremap <Space>x :xa<CR>
 " map Q gq
 " ";
 " jj or jk 插入模式下go to normal mode
+inoremap kj <Esc>
 inoremap jj <Esc>
+inoremap kk <Esc>yyp
 inoremap jk <Right>
 " , always followed by a space
 inoremap , ,<Space>
