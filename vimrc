@@ -219,6 +219,7 @@ set cursorline
 set cursorcolumn
 set splitbelow
 set splitright
+set scrolloff=5
 
 set nowrap
 set shortmess=atI
@@ -272,7 +273,7 @@ filetype plugin indent on
 set autoindent
 set smartindent
 
-
+set virtualedit=block
 " ------------ buffer
 set hidden
 
@@ -379,6 +380,9 @@ nnoremap <Space>; q:k
 nnoremap <Space>] m`:silent +g/\m^\s*$/d<CR>``:noh<CR>
 nnoremap <Space>[ m`:silent -g/\m^\s*$/d<CR>``:noh<CR>
 " "A;
+" vnoremap a :EasyAlign<CR>
+vnoremap a= :EasyAlign<CR>*<Right>=<CR>
+vnoremap a, :EasyAlign<CR>*<Right>,<CR>
 
 
 " "B
@@ -434,6 +438,11 @@ nnoremap <Leader>ss :%s/\s\+$//ge<cr>:nohl<cr>
 nnoremap <Leader>sp :set spell!<CR>
 nnoremap <Leader>sl :redraw!<CR>
 nnoremap <Leader>so :source $MYVIMRC<CR>:AirlineRefresh<CR>
+nnoremap <Leader>sy :!ctags -R *<CR>
+nnoremap <Space><Enter> <C-]>
+nnoremap <Space>h :po<CR>
+nnoremap <Space>l :tag<CR>
+nnoremap <Space>s :tselect<CR>
 
 " "T
 " nnoremap <Space>t :NERDTreeToggle<CR>
@@ -463,6 +472,7 @@ inoremap jk <Right>
 inoremap , ,<Space>
 " inoremap . .<Space>
 nnoremap <BS> <C-^>
+
 
 map Y y$
 map 0 ^
@@ -552,8 +562,10 @@ if !  g:isGUI
 endif
 " " " A-A
 " map <A-a> <Plug>NERDCommenterToggle
-nnoremap <A-a> A:<CR>
-inoremap <A-a> <Esc>A:<CR>
+" nnoremap <A-a> A:<CR>
+" inoremap <A-a> <Esc>A:<CR>
+" nnoremap <A-a> A;
+" inoremap <A-a> <Esc>A;
 
 " " " A-B
 " nnoremap <A-b> :update<CR>:!make<CR>
@@ -595,7 +607,7 @@ inoremap <A-h> <Left>
 "vnoremap <A-j> <Esc>`>jdd`<Pgv
 "vnoremap <A-J> <Esc>`>jdd`<Pgv
 " nnoremap <A-j> o<Esc>k
-inoremap <A-j> <Esc>o
+inoremap <A-j> <Esc>A<CR>
 
 " " A-K
 " nnoremap <A-k> O<Esc>
@@ -642,9 +654,9 @@ inoremap <A-Q> <Esc>:q<CR>
 vnoremap <A-Q> <Esc>:q<CR>
 
 " " A-R
-nnoremap <A-r> :update<CR>:!python %<CR>
-inoremap <A-r> <Esc>:update<CR>:!python %<CR>
-vnoremap <A-r> <Esc>:!python %<CR>
+" nnoremap <A-r> :update<CR>:!python %<CR>
+" inoremap <A-r> <Esc>:update<CR>:!python %<CR>
+" vnoremap <A-r> <Esc>:!python %<CR>
 
 " " A-S
 " map <A-s> <Esc>:update<CR>
@@ -772,7 +784,7 @@ endif
 " }}}2
 "  < ctags > {{{2
 
-set tags=./tags
+set tags=./tags,tags;$HOME
 
 
 
@@ -861,7 +873,10 @@ Plug 'vim-scripts/LineJuggler'
 Plug 'inkarkat/vim-ingo-library'
 " }}}1
 "  < Align > {{{1
+Plug 'vim-scripts/Align'
 Plug 'junegunn/vim-easy-align'
+xmap ga <Plug>(EasyAlign)
+nmap ga <Plug>(EasyAlign)
 " }}}1
 "  < fzf > {{{1
 " Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all'  }
@@ -874,6 +889,10 @@ vmap v <Plug>(expand_region_expand)
 vmap <C-v> <Plug>(expand_region_shrink)
 
 
+" }}}1
+ " < vim-plugin-minibufexpl > {{{1
+" Plug 'weynhamz/vim-plugin-minibufexpl'
+" map <Space>t :MBEToggle<cr>
 " }}}1
 "  < neocomplete.vim > {{{1
 
@@ -1120,6 +1139,8 @@ Plug 'ervandew/snipmate.vim'
 " }}}1
 "  < python-mode > {{{1
 Plug 'python-mode/python-mode'
+let g:pymode_doc = 0
+let g:pymode_rope_complete_on_dot = 0
 " }}}1
 "  < vim-repeat > {{{1
 Plug 'tpope/vim-repeat'
@@ -1136,8 +1157,8 @@ Plug 'scrooloose/nerdtree'
 
 
 " }}}1
- " < repmo.vim > {{{1
-Plug 'vim-scripts/repmo.vim'
+" < repmo.vim > {{{1
+" Plug 'vim-scripts/repmo.vim'
 " }}}1
 "  < Syntastic > {{{1
 
@@ -1173,12 +1194,22 @@ let g:syntastic_rust_checkers = ['rustc']
 
 let g:syntastic_enable_perl_checker = 1
 let g:syntastic_perl_checkers = ['perl', 'perlcritic', 'podchecker']
+let g:kevincwd = getcwd()
+if g:kevincwd == "/home/kevin/trunk"
+    let g:syntastic_perl_lib_path = ['/home/kevin/trunk/ExternalModels', '/home/kevin/trunk/Source']
+elseif g:kevincwd == "/home/kevin/VLCT-Conversion/VLCT-Conversion"
+    let g:syntastic_perl_lib_path = ['/home/kevin/VLCT-Conversion/VLCT-Conversion/lib']
+elseif g:kevincwd == "/home/kevin/tarballs/trunk"
+    let g:syntastic_perl_lib_path = ['/home/kevin/tarballs/trunk/ExternalModels', '/home/kevin/tarballs/trunk/Source']
+elseif g:kevincwd == "/home/kevin/svn/pattern_conversion_scripts/Vlct_Conversion_Tool/trunk"
+    let g:syntastic_perl_lib_path = ['/home/kevin/svn/pattern_conversion_scripts/Vlct_Conversion_Tool/trunk/ExternalModels', '/home/kevin/svn/pattern_conversion_scripts/Vlct_Conversion_Tool/trunk/Source']
+endif
 
 " let g:syntastic_enable_java_checker = 1
 " let g:syntastic_java_checker = 'javac'
 " let g:syntastic_java_javac_classpath = 'javac'
 " use eclim for java syntax check
-let g:EclimJavaValidate = 1
+" let g:EclimJavaValidate = 1
 " }}}1
 "  < vim-sdcv > {{{1
 Plug 'chusiang/vim-sdcv'
@@ -1192,8 +1223,10 @@ Plug 'tpope/vim-surround'
 Plug 'vim-airline/vim-airline'
 let g:airline_powerline_fonts=1
 let g:airline_theme='tomorrow'
-let g:airline#extensions#tabline#enabled=1
-let g:airline#extensions#tabline#buffer_idx_mode = 1
+" let g:airline#extensions#tabline#enabled=1
+" let g:airline#extensions#tabline#buffer_idx_mode = 1
+" let g:airline#extensions#whitespace#checks = [ 'indent', 'trailing', 'long', 'mixed-indent-file' ]
+let g:airline#extensions#whitespace#checks = [ 'indent' ]
 nmap <leader>1 <Plug>AirlineSelectTab1
 nmap <leader>2 <Plug>AirlineSelectTab2
 nmap <leader>3 <Plug>AirlineSelectTab3
