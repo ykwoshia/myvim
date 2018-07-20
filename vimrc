@@ -174,6 +174,8 @@ if g:isGUI
     " colorscheme base16-flat
     " colorscheme molokai
 else
+    " set background=light
+    " colorscheme solarized
     colorscheme Tomorrow-Night-Eighties
     " let base16colorspace=256  " Access colors present in 256 colorspace
     " colorscheme base16-flat
@@ -203,6 +205,7 @@ endif
 " dictionary
 set dictionary+=/usr/share/dict/words
 set complete+=k
+set completeopt=menu
 " ------------ mouse
 " can not use in mac and redhat
 " set mouse=a
@@ -347,6 +350,10 @@ set vb t_vb=
 " }}}1
 "  < Abbr Mapping > {{{1
 
+func Eatchar(pat)
+  let c = nr2char(getchar(0))
+  return (c =~ a:pat) ? '' : c
+endfunc
 " iab xdate <c-r>=strftime("%d/%m/%y %H:%M:%S")<cr>
 iab xdate <c-r>=strftime("%m/%d/%y")<cr>
 " iab endl << endl
@@ -354,7 +361,9 @@ iab cout cout <<
 iab cin cin >>
 iab #i #include
 iab teh the
-
+iabbr <silent> ss self,<C-R>=Eatchar('\s')<CR>
+iabbr <silent> se self.<C-R>=Eatchar('\s')<CR>
+iabbr <silent> sr return
 
 " }}}1
 "  < Leader Key Mapping > {{{1
@@ -364,12 +373,11 @@ iab teh the
 " let maplocalleader = "-"
 " map <Space> <Leader>
 " let mapleader = "\<Space>"
-nnoremap <Space> :
+" nnoremap <Space> :
 
 map <Space><Space> <Plug>NERDCommenterToggle
 
-" nnoremap <buffer> <LocalLeader>j <c-w>j
-map <Space>a A;<Esc>
+" map <Space>a A;<Esc>
 " "'
 nnoremap <Leader>' ''
 " ";
@@ -377,8 +385,7 @@ nnoremap <Leader>' ''
 " inoremap <Leader>; <Esc>A;<Esc>
 
 nnoremap <Space>; q:k
-nnoremap <Space>] m`:silent +g/\m^\s*$/d<CR>``:noh<CR>
-nnoremap <Space>[ m`:silent -g/\m^\s*$/d<CR>``:noh<CR>
+
 " "A;
 " vnoremap a :EasyAlign<CR>
 vnoremap a= :EasyAlign<CR>*<Right>=<CR>
@@ -434,15 +441,19 @@ nnoremap <Space>q <Esc>:q<CR>
 
 " "S
 " <leader>s use google search words selected
-nnoremap <Leader>ss :%s/\s\+$//ge<cr>:nohl<cr>
-nnoremap <Leader>sp :set spell!<CR>
-nnoremap <Leader>sl :redraw!<CR>
-nnoremap <Leader>so :source $MYVIMRC<CR>:AirlineRefresh<CR>
-nnoremap <Leader>sy :!ctags -R *<CR>
+" split and diff with previous version
+nnoremap <Space>sb :set scrollbind!<CR> 
+nnoremap <Space>sd :vs<CR>:silent Glog<CR>:cnext<CR>:windo diffthis<CR>
+nnoremap <Space>sf :windo diffthis<CR>
+nnoremap <Space>ss :%s/\s\+$//ge<cr>:nohl<cr>
+nnoremap <Space>sp :set spell!<CR>
+nnoremap <Space>sl :redraw!<CR>
+nnoremap <Space>so :source $MYVIMRC<CR>:AirlineRefresh<CR>
+nnoremap <Space>sy :!ctags -R *<CR>
 nnoremap <Space><Enter> <C-]>
 nnoremap <Space>h :po<CR>
 nnoremap <Space>l :tag<CR>
-nnoremap <Space>s :tselect<CR>
+" nnoremap <Space>s :tselect<CR>
 
 " "T
 " nnoremap <Space>t :NERDTreeToggle<CR>
@@ -464,9 +475,9 @@ nnoremap <Space>x :xa<CR>
 " map Q gq
 " ";
 " jj or jk 插入模式下go to normal mode
-inoremap kj <Esc>
+" inoremap kj <Esc>
 inoremap jj <Esc>
-inoremap kk <Esc>yyp
+" inoremap kk <Esc>yyp
 inoremap jk <Right>
 " , always followed by a space
 inoremap , ,<Space>
@@ -521,6 +532,7 @@ inoremap <F11> <Esc>:call libcallnr("gvimfullscreen.dll", "ToggleFullScreen", 0)
 cnoremap <C-A>        <Home>
 cnoremap <C-B>        <Left>
 cnoremap <C-D>        <Del>
+inoremap <C-d>        """"""<left><left><left>
 cnoremap <C-E>        <End>
 cnoremap <C-F>        <Right>
 cnoremap <C-N>        <Down>
@@ -593,10 +605,23 @@ vnoremap <A-D> "_dk
 "auto-pair occupy
 
 " " " A-F
-nnoremap <A-f> :vs<cr>gf<cr>
+" nnoremap <A-f> :vs<cr>gf<cr>
+inoremap <A-f> <Esc>a<Down><CR><Tab>def 
+nnoremap <A-f> i<Down><CR><Tab>def 
 
 " " " A-G
-"
+function! HasReturnOrPass()
+    let line = getline('.')
+    if line =~ '^\s*\(return\|pass\)\s'
+        return "\<CR>"
+    else
+        return "\<Esc>o\<BS>"
+    end
+endfunction
+
+
+inoremap <expr> <A-g> HasReturnOrPass()
+
 " " A-H
 inoremap <A-h> <Left>
 "nnoremap <A-h>
@@ -607,8 +632,18 @@ inoremap <A-h> <Left>
 "vnoremap <A-j> <Esc>`>jdd`<Pgv
 "vnoremap <A-J> <Esc>`>jdd`<Pgv
 " nnoremap <A-j> o<Esc>k
-inoremap <A-j> <Esc>A<CR>
+" inoremap <A-j> <Esc>A<CR>
+function! IsEmptyLine()
+    let line = getline('.')
+    if line =~ '^\s*$'
+        return "\<CR>"
+    else
+        return "\<Esc>o"
+    end
+endfunction
 
+inoremap <expr> <A-j> IsEmptyLine()
+    
 " " A-K
 " nnoremap <A-k> O<Esc>
 inoremap <A-k> <Esc>O
@@ -624,6 +659,8 @@ inoremap <silent> <A-l> <Esc>:call AutoPairsJump()<CR>a
 "
 " " " A-M
 " " sublime ctrl+l
+" inoremap <A-m> <Esc>A<CR><CR><C-h>def 
+" nnoremap <A-m> A<CR><CR><C-h>def 
 " nnoremap <A-m> V
 " nnoremap <A-M> V
 " vnoremap <A-m> j
@@ -631,7 +668,8 @@ inoremap <silent> <A-l> <Esc>:call AutoPairsJump()<CR>a
 "
 " " " A-N
 "  Autopair occupy
-"
+" inoremap <A-n> <CR><BS>
+
 " " " A-O
 " tmux occupy
 if !exists('$TMUX')
@@ -643,6 +681,7 @@ endif
 "
 " " A-P
 " autopair plugin occupy
+
 
 " " " A-Q
 " map <A-q> <Esc>:q<CR>
@@ -890,12 +929,18 @@ vmap <C-v> <Plug>(expand_region_shrink)
 
 
 " }}}1
- " < vim-plugin-minibufexpl > {{{1
-" Plug 'weynhamz/vim-plugin-minibufexpl'
-" map <Space>t :MBEToggle<cr>
+ " < minibufexpl > {{{1
+Plug 'techlivezheng/vim-plugin-minibufexpl'
+let g:miniBufExplBRSplit = 0   " Put new window above
+let g:miniBufExplCycleArround = 1
+let g:miniBufExplShowBufNumbers = 0
+let g:miniBufExplBuffersNeeded = 3
+" let g:miniBufExplVSplit = 20   " column width in chars
+noremap - :MBEbn<CR>
+noremap _ :MBEbp<CR>
+nnoremap <Space>t :MBEToggle<cr>
 " }}}1
 "  < neocomplete.vim > {{{1
-
 if has("lua")
     Plug 'Shougo/neocomplete.vim'
     " Note: This option must be set in .vimrc(_vimrc).  NOT IN .gvimrc(_gvimrc)!
@@ -994,7 +1039,7 @@ let g:ctrlp_working_path_mode = 's'
 "  < vim-auto-save > {{{1
 
 Plug '907th/vim-auto-save'
-set updatetime=2000
+set updatetime=1000
 let g:auto_save=1
 let g:auto_save_silent=1
 let g:auto_save_events = ["CursorHold"]
@@ -1141,6 +1186,10 @@ Plug 'ervandew/snipmate.vim'
 Plug 'python-mode/python-mode'
 let g:pymode_doc = 0
 let g:pymode_rope_complete_on_dot = 0
+let g:pymode_syntax_space_errors = 0
+" close pymode fold cause it is too slow
+let g:pymode_folding = 0
+" let g:pymode_syntax_indet_errors = 0
 " }}}1
 "  < vim-repeat > {{{1
 Plug 'tpope/vim-repeat'
@@ -1214,7 +1263,7 @@ endif
 "  < vim-sdcv > {{{1
 Plug 'chusiang/vim-sdcv'
 nmap <space>w :call SearchWord()<CR>
-" set keywordprg='sdcv'
+set keywordprg='sdcv'
 " }}}1
 "  < vim-surround > {{{1
 Plug 'tpope/vim-surround'
@@ -1255,11 +1304,11 @@ Plug 'vim-airline/vim-airline-themes'
 " }}}1
 "  < Mark--Karkat > {{{1
 Plug 'vim-scripts/Mark--Karkat'
-
-
+" }}}1
+"  < auto-around > {{{1
+Plug '~/codes/vim/vim-pyer'
 " }}}1
 "             << ------------ Plug End >> {{{1
 call plug#end()            " required
 
 " }}}1
-

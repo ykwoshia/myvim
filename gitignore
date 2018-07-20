@@ -1,0 +1,14 @@
+### vim
+*.swp
+*.swo
+
+### git 
+# git mergetool
+*.orig
+
+### python
+*.pyc
+*.pyo
+.ropeproject/
+__pycache__/
+
