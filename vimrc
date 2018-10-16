@@ -222,7 +222,10 @@ set cursorline
 set cursorcolumn
 set splitbelow
 set splitright
+
+" ------------ scroll
 set scrolloff=5
+set scrollopt+=hor
 
 set nowrap
 set shortmess=atI
@@ -361,9 +364,13 @@ iab cout cout <<
 iab cin cin >>
 iab #i #include
 iab teh the
-iabbr <silent> ss self,<C-R>=Eatchar('\s')<CR>
-iabbr <silent> se self.<C-R>=Eatchar('\s')<CR>
-iabbr <silent> sr return
+iabbr <silent> s self<C-R>=Eatchar('\s')<CR>
+iabbr <silent> sd self.<C-R>=Eatchar('\s')<CR>
+iabbr <silent> sc self,<C-R>=Eatchar('\s')<CR>
+iabbr <silent> se self<C-R>=Eatchar('\s')<CR><C-R>=pyer#smartcolon#insert()<CR><C-R>=Eatchar('\s')<CR>
+iabbr <silent> r return
+imap , ,<space>
+
 
 " }}}1
 "  < Leader Key Mapping > {{{1
@@ -388,8 +395,9 @@ nnoremap <Space>; q:k
 
 " "A;
 " vnoremap a :EasyAlign<CR>
-vnoremap a= :EasyAlign<CR>*<Right>=<CR>
-vnoremap a, :EasyAlign<CR>*<Right>,<CR>
+vnoremap <Space>a= :EasyAlign<CR>*<Right>=<CR>
+vnoremap <Space>a, :EasyAlign<CR>*<Right>,<CR>
+vnoremap <Space>a: :EasyAlign<CR>*<Right>:<CR>
 
 
 " "B
@@ -429,7 +437,7 @@ nnoremap <Leader>k <C-w>k
 nnoremap <Leader>l <C-w>l
 
 " "Q
-nnoremap <Leader>q <Esc>:q<CR>
+nnoremap <Leader>q <Esc>:bd<CR>
 nnoremap <Space>q <Esc>:q<CR>
 
 " "R
@@ -442,13 +450,18 @@ nnoremap <Space>q <Esc>:q<CR>
 " "S
 " <leader>s use google search words selected
 " split and diff with previous version
-nnoremap <Space>sb :set scrollbind!<CR> 
-nnoremap <Space>sd :vs<CR>:silent Glog<CR>:cnext<CR>:windo diffthis<CR>
-nnoremap <Space>sf :windo diffthis<CR>
-nnoremap <Space>ss :%s/\s\+$//ge<cr>:nohl<cr>
+nnoremap <Space>sb :windo set scrollbind!<CR> 
+nnoremap <Space>scl :windo set cursorline!<CR> 
+nnoremap <Space>scb :windo set cursorbind!<CR> 
+nnoremap <Space>sl :vs<CR>:silent Glog<CR>:cnext<CR>:windo diffthis<CR>
+nnoremap <Space>sd :windo diffthis<CR>
+nnoremap <Space>so :windo diffoff<CR> 
+nnoremap <Space>su :windo diffu<CR> 
+nnoremap <Space>sr :windo set relativenumber!<CR> 
+nnoremap <Space>ss :s/\s\+$//ge<cr>:nohl<cr>
 nnoremap <Space>sp :set spell!<CR>
-nnoremap <Space>sl :redraw!<CR>
-nnoremap <Space>so :source $MYVIMRC<CR>:AirlineRefresh<CR>
+" nnoremap <Space>sl :redraw!<CR>
+" nnoremap <Space>so :source $MYVIMRC<CR>:AirlineRefresh<CR>
 nnoremap <Space>sy :!ctags -R *<CR>
 nnoremap <Space><Enter> <C-]>
 nnoremap <Space>h :po<CR>
@@ -480,8 +493,12 @@ inoremap jj <Esc>
 " inoremap kk <Esc>yyp
 inoremap jk <Right>
 " , always followed by a space
-inoremap , ,<Space>
-" inoremap . .<Space>
+" inoremap , ,<Space>
+inoremap z, ,
+inoremap z: :
+inoremap zs s
+inoremap zr r
+inoremap z= =
 nnoremap <BS> <C-^>
 
 
@@ -574,7 +591,7 @@ if !  g:isGUI
 endif
 " " " A-A
 " map <A-a> <Plug>NERDCommenterToggle
-" nnoremap <A-a> A:<CR>
+nnoremap <A-a> A:<CR>
 " inoremap <A-a> <Esc>A:<CR>
 " nnoremap <A-a> A;
 " inoremap <A-a> <Esc>A;
@@ -591,6 +608,9 @@ endif
 " inoremap <A-C> <Esc>"+yy
 " nnoremap <A-C> <Esc>"+yy
 " vnoremap <A-C> "+y
+inoremap <A-c> <Esc>o<Esc>i<CR>class 
+nnoremap <A-c> <Esc>o<Esc>i<CR>class 
+
 "
 " " " A-D
 " sublime ctrl+shift+k
@@ -606,8 +626,10 @@ vnoremap <A-D> "_dk
 
 " " " A-F
 " nnoremap <A-f> :vs<cr>gf<cr>
-inoremap <A-f> <Esc>a<Down><CR><Tab>def 
-nnoremap <A-f> i<Down><CR><Tab>def 
+" inoremap <A-f> <Esc>o<Esc>ki<Down><CR><Tab>def 
+" nnoremap <A-f> <Esc>o<Esc>ki<Down><CR><Tab>def 
+inoremap <A-f> <Esc>o<Esc>i<CR><Tab>def 
+nnoremap <A-f> <Esc>o<Esc>i<CR><Tab>def 
 
 " " " A-G
 function! HasReturnOrPass()
@@ -625,6 +647,9 @@ inoremap <expr> <A-g> HasReturnOrPass()
 " " A-H
 inoremap <A-h> <Left>
 "nnoremap <A-h>
+
+" " A-I
+" inoremap <A-i> <Right>:<CR>def<Space>__init__(self, )<Left>
 
 " " A-J
 "inoremap <A-j> <Down>
@@ -655,7 +680,7 @@ inoremap <A-k> <Esc>O
 " " A-L
 "inoremap <A-l> <Right>
 "nnoremap <A-l>
-inoremap <silent> <A-l> <Esc>:call AutoPairsJump()<CR>a
+" inoremap <silent> <A-l> <Esc>:call AutoPairsJump()<CR>a
 "
 " " " A-M
 " " sublime ctrl+l
@@ -930,15 +955,15 @@ vmap <C-v> <Plug>(expand_region_shrink)
 
 " }}}1
  " < minibufexpl > {{{1
-Plug 'techlivezheng/vim-plugin-minibufexpl'
-let g:miniBufExplBRSplit = 0   " Put new window above
-let g:miniBufExplCycleArround = 1
-let g:miniBufExplShowBufNumbers = 0
-let g:miniBufExplBuffersNeeded = 3
-" let g:miniBufExplVSplit = 20   " column width in chars
-noremap - :MBEbn<CR>
-noremap _ :MBEbp<CR>
-nnoremap <Space>t :MBEToggle<cr>
+" Plug 'techlivezheng/vim-plugin-minibufexpl'
+" let g:miniBufExplBRSplit = 0   " Put new window above
+" let g:miniBufExplCycleArround = 1
+" let g:miniBufExplShowBufNumbers = 1
+" let g:miniBufExplBuffersNeeded = 3
+" " let g:miniBufExplVSplit = 20   " column width in chars
+" noremap - :MBEbn<CR>
+" noremap _ :MBEbp<CR>
+" nnoremap <Space>t :MBEToggle<cr>
 " }}}1
 "  < neocomplete.vim > {{{1
 if has("lua")
@@ -971,14 +996,14 @@ if has("lua")
     inoremap <expr><C-g>     neocomplete#undo_completion()
     inoremap <expr><C-l>     neocomplete#complete_common_string()
 
-    " Recommended key-mappings.
-    " <CR>: close popup and save indent.
-    inoremap <silent> <CR> <C-r>=<SID>my_cr_function()<CR>
-    function! s:my_cr_function()
-        return (pumvisible() ? "\<C-y>" : "" ) . "\<CR>"
-        " For no inserting <CR> key.
-        "return pumvisible() ? "\<C-y>" : "\<CR>"
-    endfunction
+    ""  " Recommended key-mappings.
+    ""  " <CR>: close popup and save indent.
+    ""  inoremap <silent> <CR> <C-r>=<SID>my_cr_function()<CR>
+    ""  function! s:my_cr_function()
+    ""      return (pumvisible() ? "\<C-y>" : "" ) . "\<CR>"
+    ""      " For no inserting <CR> key.
+    ""      "return pumvisible() ? "\<C-y>" : "\<CR>"
+    ""  endfunction
     " <TAB>: completion.
     inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
     " <C-h>, <BS>: close popup and delete backword char.
@@ -1023,7 +1048,8 @@ endif
 
 
 " }}}1
-"  < txtbrowser > {{{1
+"  < targets > {{{1
+Plug 'wellle/targets.vim'
 
 
 
@@ -1039,6 +1065,7 @@ let g:ctrlp_working_path_mode = 's'
 "  < vim-auto-save > {{{1
 
 Plug '907th/vim-auto-save'
+" let g:auto_save = 0  " enable AutoSave on Vim startup
 set updatetime=1000
 let g:auto_save=1
 let g:auto_save_silent=1
@@ -1073,13 +1100,13 @@ let g:SuperTabContextDiscoverDiscovery = ["&completefunc:<c-p>", "&omnifunc:<c-x
 
 " }}}1
 "  < auto-pairs > {{{1
-
 Plug 'jiangmiao/auto-pairs'
-
-
+let g:AutoPairsMapSpace = 0
+" }}}1
+"  < vim-autoread > {{{1
+Plug 'djoshea/vim-autoread'
 " }}}1
 "  < vim-sneak > {{{1
-
 Plug 'justinmk/vim-sneak'
 "replace 'f' with 1-char Sneak
 nmap f <Plug>Sneak_f
@@ -1190,6 +1217,7 @@ let g:pymode_syntax_space_errors = 0
 " close pymode fold cause it is too slow
 let g:pymode_folding = 0
 " let g:pymode_syntax_indet_errors = 0
+let g:pymode_trim_whitespaces = 0
 " }}}1
 "  < vim-repeat > {{{1
 Plug 'tpope/vim-repeat'
@@ -1252,6 +1280,8 @@ elseif g:kevincwd == "/home/kevin/tarballs/trunk"
     let g:syntastic_perl_lib_path = ['/home/kevin/tarballs/trunk/ExternalModels', '/home/kevin/tarballs/trunk/Source']
 elseif g:kevincwd == "/home/kevin/svn/pattern_conversion_scripts/Vlct_Conversion_Tool/trunk"
     let g:syntastic_perl_lib_path = ['/home/kevin/svn/pattern_conversion_scripts/Vlct_Conversion_Tool/trunk/ExternalModels', '/home/kevin/svn/pattern_conversion_scripts/Vlct_Conversion_Tool/trunk/Source']
+elseif g:kevincwd == "/home/kevin/0816/checkpin"
+    let g:syntastic_perl_lib_path = ['/home/kevin/0816/checkpin/ExternalModels', '/home/kevin/0816/checkpin/Source']
 endif
 
 " let g:syntastic_enable_java_checker = 1
@@ -1272,21 +1302,21 @@ Plug 'tpope/vim-surround'
 Plug 'vim-airline/vim-airline'
 let g:airline_powerline_fonts=1
 let g:airline_theme='tomorrow'
-" let g:airline#extensions#tabline#enabled=1
-" let g:airline#extensions#tabline#buffer_idx_mode = 1
+let g:airline#extensions#tabline#enabled=1
+let g:airline#extensions#tabline#buffer_idx_mode = 1
 " let g:airline#extensions#whitespace#checks = [ 'indent', 'trailing', 'long', 'mixed-indent-file' ]
 let g:airline#extensions#whitespace#checks = [ 'indent' ]
-nmap <leader>1 <Plug>AirlineSelectTab1
-nmap <leader>2 <Plug>AirlineSelectTab2
-nmap <leader>3 <Plug>AirlineSelectTab3
-nmap <leader>4 <Plug>AirlineSelectTab4
-nmap <leader>5 <Plug>AirlineSelectTab5
-nmap <leader>6 <Plug>AirlineSelectTab6
-nmap <leader>7 <Plug>AirlineSelectTab7
-nmap <leader>8 <Plug>AirlineSelectTab8
-nmap <leader>9 <Plug>AirlineSelectTab9
-nmap <leader>- <Plug>AirlineSelectPrevTab
-nmap <leader>\ <Plug>AirlineSelectNextTab
+nmap <Space>1 <Plug>AirlineSelectTab1
+nmap <Space>2 <Plug>AirlineSelectTab2
+nmap <Space>3 <Plug>AirlineSelectTab3
+nmap <Space>4 <Plug>AirlineSelectTab4
+nmap <Space>5 <Plug>AirlineSelectTab5
+nmap <Space>6 <Plug>AirlineSelectTab6
+nmap <Space>7 <Plug>AirlineSelectTab7
+nmap <Space>8 <Plug>AirlineSelectTab8
+nmap <Space>9 <Plug>AirlineSelectTab9
+nmap _ <Plug>AirlineSelectPrevTab
+nmap - <Plug>AirlineSelectNextTab
 " nmap - <Plug>AirlineSelectPrevTab
 " nmap + <Plug>AirlineSelectNextTab
 let g:airline#extensions#tabline#show_buffers = 1
@@ -1305,7 +1335,7 @@ Plug 'vim-airline/vim-airline-themes'
 "  < Mark--Karkat > {{{1
 Plug 'vim-scripts/Mark--Karkat'
 " }}}1
-"  < auto-around > {{{1
+"  < vim-pyer > {{{1
 Plug '~/codes/vim/vim-pyer'
 " }}}1
 "             << ------------ Plug End >> {{{1
