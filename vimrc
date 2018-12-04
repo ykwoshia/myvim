@@ -1336,7 +1336,12 @@ Plug 'vim-airline/vim-airline-themes'
 Plug 'vim-scripts/Mark--Karkat'
 " }}}1
 "  < vim-pyer > {{{1
-Plug '~/codes/vim/vim-pyer'
+" Plug '~/codes/vim/vim-pyer'
+" }}}1
+"  < eregex.vim > {{{1
+Plug 'othree/eregex.vim'
+let g:eregex_default_enable=0
+nnoremap <space>/ :call eregex#toggle()<CR>
 " }}}1
 "             << ------------ Plug End >> {{{1
 call plug#end()            " required
