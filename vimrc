@@ -371,7 +371,6 @@ iabbr <silent> se self<C-R>=Eatchar('\s')<CR><C-R>=pyer#smartcolon#insert()<CR><
 iabbr <silent> r return
 imap , ,<space>
 
-
 " }}}1
 "  < Leader Key Mapping > {{{1
 
@@ -458,7 +457,7 @@ nnoremap <Space>sd :windo diffthis<CR>
 nnoremap <Space>so :windo diffoff<CR> 
 nnoremap <Space>su :windo diffu<CR> 
 nnoremap <Space>sr :windo set relativenumber!<CR> 
-nnoremap <Space>ss :s/\s\+$//ge<cr>:nohl<cr>
+nnoremap <Space>ss :%s/\s\+$//ge<cr>:nohl<cr>
 nnoremap <Space>sp :set spell!<CR>
 " nnoremap <Space>sl :redraw!<CR>
 " nnoremap <Space>so :source $MYVIMRC<CR>:AirlineRefresh<CR>
@@ -494,7 +493,7 @@ inoremap jj <Esc>
 inoremap jk <Right>
 " , always followed by a space
 " inoremap , ,<Space>
-inoremap z, ,
+inoremap z, ,<CR>
 inoremap z: :
 inoremap zs s
 inoremap zr r
@@ -1259,12 +1258,39 @@ endif
 let g:syntastic_cpp_compiler_options = ' -std=c++11 '
 
 " no pylint for syntax check
-let g:syntastic_mode_map = {
-            \ "mode": "active",
-            \ "active_filetypes": [] }
-" , \ "passive_filetypes": ["python"] }
+" let g:syntastic_mode_map = {
+            " \ "mode": "active",
+            " \ "active_filetypes": []  }
+            " \ "passive_filetypes": ["python"] }
 " no +python compile for vim, so can not use pymode also
 " let g:pymode_lint_on_write = 0
+" let g:syntastic_enable_python_checker = 1
+" let g:syntastic_python_checkers = ['flake8']
+" let g:syntastic_python_flake8_args = ['--ignore=E126,E127,E128,
+            " \ E201,E202,E203,E211,E221,E222,E225,E226,E228,E231,E251,E261,E265,E266,
+            " \ E302,E303,E305,
+            " \ F403,
+            " \ E501,
+            " \ W2,W3']
+"  continuation line over-indented for visual indent [E127]
+"  continuation line under-indented for visual indent [E128]
+"  whitespace after '(' [E201]
+"  whitespace before ')' [E202]
+"  whitespace before ':' [E203]
+"  multiple spaces before operator [E221]
+"  multiple spaces after operator [E222]
+"  missing whitespace around operator [E225]
+"  missing whitespace around arithmetic operator [E226]
+"  missing whitespace after ',' [E231]
+"  unexpected spaces around keyword / parameter equals [E251]
+"  block comment should start with '# ' [E265]
+"  expected 2 blank lines, found 1 [E302]
+"  too many blank lines (2) [E303]
+"  'from wrapperworker import *' used; unable to detect undefined names [F403]
+"  line too long (88 > 79 characters) [E501]
+"  expected 2 blank lines after class or function definition, found 1 [E305]
+"  blank line contains whitespace [W293]
+"  blank line at end of file [W391]
 
 let g:syntastic_enable_rust_checker = 1
 let g:syntastic_rust_checkers = ['rustc']
@@ -1336,7 +1362,7 @@ Plug 'vim-airline/vim-airline-themes'
 Plug 'vim-scripts/Mark--Karkat'
 " }}}1
 "  < vim-pyer > {{{1
-" Plug '~/codes/vim/vim-pyer'
+Plug 'ykwoshia/vim-pyer'
 " }}}1
 "  < eregex.vim > {{{1
 Plug 'othree/eregex.vim'
