@@ -108,7 +108,9 @@ if !g:iswindows
 
     else
         " very important can not change10/11/16
-        set term=screen-256color
+        if !has('nvim')
+            set term=screen-256color
+        endif
         " terminal option : number of colors
         set t_Co=256
         " terminal option : clearing uses the current background color
@@ -134,15 +136,17 @@ au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g
 " au InsertEnter,VimLeave * silent execute "!gconftool-2 --type string --set /apps/gnome-terminal/profiles/Default/cursor_shape ibeam"
 " au InsertLeave,VimEnter * silent execute "!gconftool-2 --type string --set /apps/gnome-terminal/profiles/Default/cursor_shape block"
 
-if has("autocmd")
-    au VimEnter,InsertLeave * silent execute '!echo -ne "\e[2 q"' | redraw!
-    au InsertEnter,InsertChange *
-                \ if v:insertmode == 'i' | 
-                \   silent execute '!echo -ne "\e[6 q"' | redraw! |
-                \ elseif v:insertmode == 'r' |
-                \   silent execute '!echo -ne "\e[4 q"' | redraw! |
-                \ endif
-    au VimLeave * silent execute '!echo -ne "\e[ q"' | redraw!
+if !has('nvim')
+    if has("autocmd")
+        au VimEnter,InsertLeave * silent execute '!echo -ne "\e[2 q"' | redraw!
+        au InsertEnter,InsertChange *
+                    \ if v:insertmode == 'i' | 
+                    \   silent execute '!echo -ne "\e[6 q"' | redraw! |
+                    \ elseif v:insertmode == 'r' |
+                    \   silent execute '!echo -ne "\e[4 q"' | redraw! |
+                    \ endif
+        au VimLeave * silent execute '!echo -ne "\e[ q"' | redraw!
+    endif
 endif
 " }}}1
 "                          << User functions >> {{{1
@@ -229,13 +233,13 @@ set scrollopt+=hor
 
 set nowrap
 set shortmess=atI
-if has("lua")
-    winpos 0 0
-    set lines=500 columns=500
-else
-    winpos 1250 0
-    set lines=80 columns=100
-endif
+" if has("lua")
+    " winpos 0 0
+    " set lines=500 columns=500
+" else
+    " winpos 1250 0
+    " set lines=80 columns=100
+" endif
 
 if executable('goldendict')
     set keywordprg=goldendict
@@ -462,6 +466,7 @@ nnoremap <Space>sp :set spell!<CR>
 " nnoremap <Space>sl :redraw!<CR>
 " nnoremap <Space>so :source $MYVIMRC<CR>:AirlineRefresh<CR>
 nnoremap <Space>sy :!ctags -R *<CR>
+nmap <Space>s' viwS'
 nnoremap <Space><Enter> <C-]>
 nnoremap <Space>h :po<CR>
 nnoremap <Space>l :tag<CR>
@@ -489,6 +494,7 @@ nnoremap <Space>x :xa<CR>
 " jj or jk 插入模式下go to normal mode
 " inoremap kj <Esc>
 inoremap jj <Esc>
+imap j; jj;ce
 " inoremap kk <Esc>yyp
 inoremap jk <Right>
 " , always followed by a space
@@ -571,22 +577,24 @@ cnoremap <C-P>        <Up>
 "  < Alt Key Mapping > {{{1
 
 "  Alt keys ---------------------------------------------------------
-if !  g:isGUI
-    let c='a'
-    while c <= 'z'
-        exec "set <A-".c.">=\e".c
-        exec "imap \e".c." <A-".c.">"
-        let c = nr2char(1+char2nr(c))
-    endw
+if !has('nvim')
+    if !g:isGUI
+        let c='a'
+        while c <= 'z'
+            exec "set <A-".c.">=\e".c
+            exec "imap \e".c." <A-".c.">"
+            let c = nr2char(1+char2nr(c))
+        endw
 
-    let C='A'
-    while C <= 'Z'
-        exec "set <A-".C.">=\e".C
-        exec "imap \e".C." <A-".C.">"
-        let C = nr2char(1+char2nr(C))
-    endw
+        let C='A'
+        while C <= 'Z'
+            exec "set <A-".C.">=\e".C
+            exec "imap \e".C." <A-".C.">"
+            let C = nr2char(1+char2nr(C))
+        endw
 
-    set timeout ttimeoutlen=50
+        set timeout ttimeoutlen=50
+    endif
 endif
 " " " A-A
 " map <A-a> <Plug>NERDCommenterToggle
@@ -1068,7 +1076,11 @@ Plug '907th/vim-auto-save'
 set updatetime=1000
 let g:auto_save=1
 let g:auto_save_silent=1
-let g:auto_save_events = ["CursorHold"]
+if has('nvim')
+    let g:auto_save_events = ["CursorHold", "BufHidden"]
+else
+    let g:auto_save_events = ["CursorHold", "BufHidden", "ExitPre"]
+endif
 
 
 " }}}1
@@ -1210,6 +1222,7 @@ Plug 'ervandew/snipmate.vim'
 " }}}1
 "  < python-mode > {{{1
 Plug 'python-mode/python-mode'
+let g:pymode = 1
 let g:pymode_doc = 0
 let g:pymode_rope_complete_on_dot = 0
 let g:pymode_syntax_space_errors = 0

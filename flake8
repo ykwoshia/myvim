@@ -1,0 +1,4 @@
+[flake8]
+# E702 for pymode breakpoint
+ignore = E702
+max-line-length = 160
