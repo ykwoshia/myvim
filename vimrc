@@ -132,6 +132,8 @@ au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g
 " au BufRead * normal zi
 " auto change dir to current file but conflict with fugitive
 " au BufRead,BufNewFile,BufEnter * cd %:p:h
+"
+autocmd FileType perl setlocal complete-=i
 
 " au InsertEnter,VimLeave * silent execute "!gconftool-2 --type string --set /apps/gnome-terminal/profiles/Default/cursor_shape ibeam"
 " au InsertLeave,VimEnter * silent execute "!gconftool-2 --type string --set /apps/gnome-terminal/profiles/Default/cursor_shape block"
@@ -226,6 +228,7 @@ set cursorline
 set cursorcolumn
 set splitbelow
 set splitright
+set winwidth=30
 
 " ------------ scroll
 set scrolloff=5
@@ -367,13 +370,14 @@ iab xdate <c-r>=strftime("%m/%d/%y")<cr>
 iab cout cout <<
 iab cin cin >>
 iab #i #include
+iab #d #define
 iab teh the
-iabbr <silent> s self<C-R>=Eatchar('\s')<CR>
+" iabbr <silent> s self<C-R>=Eatchar('\s')<CR>
 iabbr <silent> sd self.<C-R>=Eatchar('\s')<CR>
 iabbr <silent> sc self,<C-R>=Eatchar('\s')<CR>
 iabbr <silent> se self<C-R>=Eatchar('\s')<CR><C-R>=pyer#smartcolon#insert()<CR><C-R>=Eatchar('\s')<CR>
 iabbr <silent> r return
-imap , ,<space>
+" imap , ,<space>
 
 " }}}1
 "  < Leader Key Mapping > {{{1
@@ -397,12 +401,12 @@ nnoremap <Leader>' ''
 nnoremap <Space>; q:k
 
 " "A;
-" vnoremap a :EasyAlign<CR>
-vnoremap <Space>a= :EasyAlign<CR>*<Right>=<CR>
-vnoremap <Space>a, :EasyAlign<CR>*<Right>,<CR>
-vnoremap <Space>a: :EasyAlign<CR>*<Right>:<CR>
-
-
+vnoremap <Space>/ :Align //<CR>
+vnoremap <Space>= :Align =<CR>
+" vnoremap <Space>a= :EasyAlign<CR>*<Right>=<CR>
+" vnoremap <Space>a, :EasyAlign<CR>*<Right>,<CR>
+" vnoremap <Space>a: :EasyAlign<CR>*<Right>:<CR>
+nnoremap <Space>a :SyntasticCheck<CR>
 " "B
 " nnoremap <Leader>b :update<CR>:!make<CR>
 " "E
@@ -458,10 +462,12 @@ nnoremap <Space>scl :windo set cursorline!<CR>
 nnoremap <Space>scb :windo set cursorbind!<CR> 
 nnoremap <Space>sl :vs<CR>:silent Glog<CR>:cnext<CR>:windo diffthis<CR>
 nnoremap <Space>sd :windo diffthis<CR>
+nnoremap <Space>sh :noh<CR>
 nnoremap <Space>so :windo diffoff<CR> 
 nnoremap <Space>su :windo diffu<CR> 
 nnoremap <Space>sr :windo set relativenumber!<CR> 
 nnoremap <Space>ss :%s/\s\+$//ge<cr>:nohl<cr>
+nnoremap <Space>sm :make<CR>
 nnoremap <Space>sp :set spell!<CR>
 " nnoremap <Space>sl :redraw!<CR>
 " nnoremap <Space>so :source $MYVIMRC<CR>:AirlineRefresh<CR>
@@ -471,6 +477,8 @@ nnoremap <Space><Enter> <C-]>
 nnoremap <Space>h :po<CR>
 nnoremap <Space>l :tag<CR>
 " nnoremap <Space>s :tselect<CR>
+
+map <F1> :h <C-R><C-W><CR>
 
 " "T
 " nnoremap <Space>t :NERDTreeToggle<CR>
@@ -499,8 +507,9 @@ imap j; jj;ce
 inoremap jk <Right>
 " , always followed by a space
 " inoremap , ,<Space>
-inoremap z, ,<CR>
+inoremap z, ,
 inoremap z: :
+inoremap z; ;
 inoremap zs s
 inoremap zr r
 inoremap z= =
@@ -530,7 +539,9 @@ vnoremap > >gv
 " F3
 " for xxx
 " F4 compile
-nnoremap <F4> :update<CR>:!make<CR>
+nnoremap <F4> :update<CR>:!make -j 4<CR>
+nnoremap <Space>e :update<CR>:!make -j 4<CR>
+nnoremap <Space>r :!./a.out<CR>
 inoremap <F4> <Esc>:update<CR>:!make<CR>
 " F5 run previous command
 nnoremap <F5> :!./out<CR>
@@ -542,15 +553,18 @@ inoremap <F6> <Esc>:update<CR>:!./%<CR>
 inoremap <F7> [I:let nr = input("Which one: ")<Bar>exe "normal " . nr ."[\t"<CR>
 nnoremap <F7> <Esc>[I:let nr = input("Which one: ")<Bar>exe "normal " . nr ."[\t"<CR>
 
+nnoremap <F11> :let b:syntastic_skip_checks = 1<CR>
 nnoremap <F12> :SyntasticToggleMode<CR>
 
-nnoremap <F11> :call libcallnr("gvimfullscreen.dll", "ToggleFullScreen", 0)<CR>
-inoremap <F11> <Esc>:call libcallnr("gvimfullscreen.dll", "ToggleFullScreen", 0)<CR>
+" nnoremap <F11> :call libcallnr("gvimfullscreen.dll", "ToggleFullScreen", 0)<CR>
+" inoremap <F11> <Esc>:call libcallnr("gvimfullscreen.dll", "ToggleFullScreen", 0)<CR>
 
 
 " }}}1
 "  < Ctrl Key Mapping > {{{1
 
+inoremap <C-L> <Right>
+inoremap <C-K> <C-o>D
 cnoremap <C-A>        <Home>
 cnoremap <C-B>        <Left>
 cnoremap <C-D>        <Del>
@@ -598,10 +612,12 @@ if !has('nvim')
 endif
 " " " A-A
 " map <A-a> <Plug>NERDCommenterToggle
-nnoremap <A-a> A:<CR>
+" nnoremap <A-a> A:<CR>
 " inoremap <A-a> <Esc>A:<CR>
 " nnoremap <A-a> A;
 " inoremap <A-a> <Esc>A;
+nnoremap <A-a> A;<Esc>
+inoremap <A-a> <Esc>A;<CR>
 
 " " " A-B
 " nnoremap <A-b> :update<CR>:!make<CR>
@@ -674,7 +690,18 @@ function! IsEmptyLine()
     end
 endfunction
 
-inoremap <expr> <A-j> IsEmptyLine()
+inoremap <expr> <C-j> IsEmptyLine()
+
+func! NewFuncReturn()
+    let line = getline('.')
+    if line =~ '^\s*$'
+        return "\<CR>{}\<Left>\<CR>\<Esc>O"
+    else
+        return "\<Esc>o{}\<Left>\<CR>\<Esc>O"
+    end
+endf
+inoremap <expr> <A-j> NewFuncReturn()
+
     
 " " A-K
 " nnoremap <A-k> O<Esc>
@@ -725,7 +752,7 @@ inoremap <A-Q> <Esc>:q<CR>
 vnoremap <A-Q> <Esc>:q<CR>
 
 " " A-R
-" nnoremap <A-r> :update<CR>:!python %<CR>
+nnoremap <A-r> :update<CR>:!perl %<CR>
 " inoremap <A-r> <Esc>:update<CR>:!python %<CR>
 " vnoremap <A-r> <Esc>:!python %<CR>
 
@@ -973,7 +1000,7 @@ vmap <C-v> <Plug>(expand_region_shrink)
 " nnoremap <Space>t :MBEToggle<cr>
 " }}}1
 "  < neocomplete.vim > {{{1
-if has("lua")
+if !has("lua")
     Plug 'Shougo/neocomplete.vim'
     " Note: This option must be set in .vimrc(_vimrc).  NOT IN .gvimrc(_gvimrc)!
     " Disable AutoComplPop.
@@ -1079,7 +1106,8 @@ let g:auto_save_silent=1
 if has('nvim')
     let g:auto_save_events = ["CursorHold", "BufHidden"]
 else
-    let g:auto_save_events = ["CursorHold", "BufHidden", "ExitPre"]
+    " let g:auto_save_events = ["CursorHold", "BufHidden", "ExitPre"]
+    let g:auto_save_events = ["CursorHold", "BufHidden"]
 endif
 
 
@@ -1094,7 +1122,8 @@ Plug 'ervandew/supertab'
 " let g:SuperTabNoCompleteBefore = [];
 let g:SuperTabNoCompleteAfter = ['^','\s']
 
-let g:SuperTabDefaultCompletionType = "context"
+" let g:SuperTabDefaultCompletionType = "context"
+let g:SuperTabDefaultCompletionType = "<c-p>"
 let g:SuperTabContextDefaultCompletionType = "<c-p>"
 let g:SuperTabCompletionContexts = ['s:ContextText', 's:ContextDiscover']
 let g:SuperTabContextDiscoverDiscovery = ["&completefunc:<c-p>", "&omnifunc:<c-x><c-o>"]
@@ -1110,12 +1139,18 @@ let g:SuperTabContextDiscoverDiscovery = ["&completefunc:<c-p>", "&omnifunc:<c-x
 
 
 " }}}1
+"  < vim-orgmode > {{{1
+Plug 'jceb/vim-orgmode'
+" }}}1
 "  < auto-pairs > {{{1
 Plug 'jiangmiao/auto-pairs'
 let g:AutoPairsMapSpace = 0
 " }}}1
 "  < vim-autoread > {{{1
 Plug 'djoshea/vim-autoread'
+" }}}1
+"  < vim-alpg > {{{1
+Plug '~/.vim/bundle/vim-alpg'
 " }}}1
 "  < vim-sneak > {{{1
 Plug 'justinmk/vim-sneak'
@@ -1209,6 +1244,29 @@ hi SneakStreakTarget guifg=black guibg=blue ctermfg=black ctermbg=blue
 " 
 " 
 " " }}}1
+"  < vdebug > {{{1
+Plug 'vim-vdebug/vdebug'
+    let g:vdebug_options = {
+    \    'port' : 9000,
+    \    'timeout' : 20,
+    \    'server' : '',
+    \    'on_close' : 'stop',
+    \    'break_on_open' : 1,
+    \    'ide_key' : '',
+    \    'debug_window_level' : 0,
+    \    'debug_file_level' : 0,
+    \    'debug_file' : '',
+    \    'path_maps' : {},
+    \    'watch_window_style' : 'compact',
+    \    'marker_default' : '⬦',
+    \    'marker_closed_tree' : '▸',
+    \    'marker_open_tree' : '▾',
+    \    'sign_breakpoint' : '▷',
+    \    'sign_current' : '▶',
+    \    'continuous_mode'  : 1
+    \}
+
+" }}}1
 "  < Tagbar > {{{1
 
 Plug 'majutsushi/tagbar'
@@ -1221,7 +1279,7 @@ let g:tagbar_width=30
 Plug 'ervandew/snipmate.vim'
 " }}}1
 "  < python-mode > {{{1
-Plug 'python-mode/python-mode'
+" Plug 'python-mode/python-mode'
 let g:pymode = 1
 let g:pymode_doc = 0
 let g:pymode_rope_complete_on_dot = 0
@@ -1259,22 +1317,22 @@ set statusline+=%*
 let g:syntastic_always_populate_loc_list = 1
 let g:syntastic_auto_jump = 1
 let g:syntastic_auto_loc_list = 1       "default is 0
-let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_open = 0
 let g:syntastic_check_on_wq = 0
 
-if has("lua")
-    let g:syntastic_cpp_compiler = 'g++'
-else
-    let g:syntastic_cpp_compiler = 'g++5.3'
-endif
+" if has("lua")
+" let g:syntastic_cpp_compiler = 'g++'
+" else
+    " let g:syntastic_cpp_compiler = 'g++5.3'
+" endif
 
-let g:syntastic_cpp_compiler_options = ' -std=c++11 '
+" let g:syntastic_cpp_compiler_options = '-std=c++11 -pthread -g -O3 -w'
 
 " no pylint for syntax check
-" let g:syntastic_mode_map = {
-            " \ "mode": "active",
-            " \ "active_filetypes": []  }
-            " \ "passive_filetypes": ["python"] }
+let g:syntastic_mode_map = {
+            \ "mode": "active",
+            \ "active_filetypes": [],
+            \ "passive_filetypes": ["python", "cpp"] }
 " no +python compile for vim, so can not use pymode also
 " let g:pymode_lint_on_write = 0
 " let g:syntastic_enable_python_checker = 1
@@ -1310,36 +1368,41 @@ let g:syntastic_rust_checkers = ['rustc']
 
 let g:syntastic_enable_perl_checker = 1
 let g:syntastic_perl_checkers = ['perl', 'perlcritic', 'podchecker']
-let g:kevincwd = getcwd()
-if g:kevincwd == "/home/kevin/trunk"
-    let g:syntastic_perl_lib_path = ['/home/kevin/trunk/ExternalModels', '/home/kevin/trunk/Source']
-elseif g:kevincwd == "/home/kevin/VLCT-Conversion/VLCT-Conversion"
-    let g:syntastic_perl_lib_path = ['/home/kevin/VLCT-Conversion/VLCT-Conversion/lib']
-elseif g:kevincwd == "/home/kevin/tarballs/trunk"
-    let g:syntastic_perl_lib_path = ['/home/kevin/tarballs/trunk/ExternalModels', '/home/kevin/tarballs/trunk/Source']
-elseif g:kevincwd == "/home/kevin/svn/pattern_conversion_scripts/Vlct_Conversion_Tool/trunk"
-    let g:syntastic_perl_lib_path = ['/home/kevin/svn/pattern_conversion_scripts/Vlct_Conversion_Tool/trunk/ExternalModels', '/home/kevin/svn/pattern_conversion_scripts/Vlct_Conversion_Tool/trunk/Source']
-elseif g:kevincwd == "/home/kevin/0816/checkpin"
-    let g:syntastic_perl_lib_path = ['/home/kevin/0816/checkpin/ExternalModels', '/home/kevin/0816/checkpin/Source']
-endif
+" let g:kevincwd = getcwd()
+let g:syntastic_perl_lib_path = ['./lib']
+" if g:kevincwd == "/mnt/d/VSWorkspace/20190630/ReadFBC/ReadFBC" 
+    " let g:syntastic_perl_lib_path = ['/home/kevin/trunk/ExternalModels', '/home/kevin/trunk/Source']
+" elseif g:kevincwd == "/home/kevin/VLCT-Conversion/VLCT-Conversion"
+    " let g:syntastic_perl_lib_path = ['/home/kevin/VLCT-Conversion/VLCT-Conversion/lib']
+" elseif g:kevincwd == "/home/kevin/tarballs/trunk"
+    " let g:syntastic_perl_lib_path = ['/home/kevin/tarballs/trunk/ExternalModels', '/home/kevin/tarballs/trunk/Source']
+" elseif g:kevincwd == "/home/kevin/svn/pattern_conversion_scripts/Vlct_Conversion_Tool/trunk"
+    " let g:syntastic_perl_lib_path = ['/home/kevin/svn/pattern_conversion_scripts/Vlct_Conversion_Tool/trunk/ExternalModels', '/home/kevin/svn/pattern_conversion_scripts/Vlct_Conversion_Tool/trunk/Source']
+" elseif g:kevincwd == "/home/kevin/0816/checkpin"
+    " let g:syntastic_perl_lib_path = ['/home/kevin/0816/checkpin/ExternalModels', '/home/kevin/0816/checkpin/Source']
+" endif
 
 " let g:syntastic_enable_java_checker = 1
 " let g:syntastic_java_checker = 'javac'
 " let g:syntastic_java_javac_classpath = 'javac'
 " use eclim for java syntax check
 " let g:EclimJavaValidate = 1
+
+
+
+
 " }}}1
 "  < vim-sdcv > {{{1
-Plug 'chusiang/vim-sdcv'
-nmap <space>w :call SearchWord()<CR>
-set keywordprg='sdcv'
+" Plug 'chusiang/vim-sdcv'
+" nmap <space>w :call SearchWord()<CR>
+" set keywordprg='sdcv'
 " }}}1
 "  < vim-surround > {{{1
 Plug 'tpope/vim-surround'
 " }}}1
  " < vim-airline > {{{1
 Plug 'vim-airline/vim-airline'
-let g:airline_powerline_fonts=1
+let g:airline_powerline_fonts=0
 let g:airline_theme='tomorrow'
 let g:airline#extensions#tabline#enabled=1
 let g:airline#extensions#tabline#buffer_idx_mode = 1
@@ -1376,6 +1439,8 @@ Plug 'vim-scripts/Mark--Karkat'
 " }}}1
 "  < vim-pyer > {{{1
 Plug 'ykwoshia/vim-pyer'
+" let g:pyer#around = {'=':' ', '+':' '}
+let g:pyer#around = {'=':' '}
 " }}}1
 "  < eregex.vim > {{{1
 Plug 'othree/eregex.vim'
