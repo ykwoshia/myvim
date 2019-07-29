@@ -1,0 +1,13 @@
+Host codereview.qt-project.org
+    Hostname codereview.qt-project.org
+    Port 29418
+    User ykwoshia
+    PreferredAuthentications publickey
+    IdentityFile ~/.ssh/id_rsa
+
+Host ykwoshia
+    Hostname 149.248.59.188
+    Port 22
+    User git
+    PreferredAuthentications publickey
+    IdentityFile ~/.ssh/id_rsa
