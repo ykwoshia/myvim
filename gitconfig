@@ -4,6 +4,8 @@
 
 [core]
 	editor = vim
+	autocrlf = input
+	pager = less -FRSX
 
 [merge]
     tool = vimdiff
@@ -19,3 +21,12 @@
 #        proxy = socks5://127.0.0.1:1080
 [http]
 #        proxy = socks5://127.0.0.1:1080
+[status]
+	showUntrackedFiles = all
+[rerere]
+	enabled = true
+	autoupdate = true
+[rebase]
+	stat = true
+[color]
+	ui = auto

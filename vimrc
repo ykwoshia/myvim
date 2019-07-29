@@ -134,6 +134,7 @@ au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g
 " au BufRead,BufNewFile,BufEnter * cd %:p:h
 "
 autocmd FileType perl setlocal complete-=i
+autocmd FileType cpp setlocal complete-=i
 
 " au InsertEnter,VimLeave * silent execute "!gconftool-2 --type string --set /apps/gnome-terminal/profiles/Default/cursor_shape ibeam"
 " au InsertLeave,VimEnter * silent execute "!gconftool-2 --type string --set /apps/gnome-terminal/profiles/Default/cursor_shape block"
@@ -195,7 +196,7 @@ if g:iswindows
     " set guifont=YaHei_Consolas_Hybrid:h10
 else
     if g:isGUI
-        " set guifont=BitstreamVeraSansMono\ 10.5
+        set guifont=BitstreamVeraSansMono\ 12
         if has("lua")
 
         else
@@ -209,9 +210,9 @@ else
 endif
 
 " dictionary
-set dictionary+=/usr/share/dict/words
-set complete+=k
-set completeopt=menu
+" set dictionary+=/usr/share/dict/words
+" set complete+=k
+" set completeopt=menu
 " ------------ mouse
 " can not use in mac and redhat
 " set mouse=a
@@ -372,10 +373,10 @@ iab cin cin >>
 iab #i #include
 iab #d #define
 iab teh the
-" iabbr <silent> s self<C-R>=Eatchar('\s')<CR>
+iabbr <silent> s self<C-R>=Eatchar('\s')<CR>
 iabbr <silent> sd self.<C-R>=Eatchar('\s')<CR>
 iabbr <silent> sc self,<C-R>=Eatchar('\s')<CR>
-iabbr <silent> se self<C-R>=Eatchar('\s')<CR><C-R>=pyer#smartcolon#insert()<CR><C-R>=Eatchar('\s')<CR>
+" iabbr <silent> se self<C-R>=Eatchar('\s')<CR><C-R>=pyer#smartcolon#insert()<CR><C-R>=Eatchar('\s')<CR>
 iabbr <silent> r return
 " imap , ,<space>
 
@@ -481,9 +482,9 @@ nnoremap <Space>l :tag<CR>
 map <F1> :h <C-R><C-W><CR>
 
 " "T
-" nnoremap <Space>t :NERDTreeToggle<CR>
-nnoremap <F3> :NERDTreeToggle<CR>
-inoremap <F3> <Esc>:NERDTreeToggle<CR>
+nnoremap <Space>t :NERDTreeToggle<CR>
+" nnoremap <F3> :NERDTreeToggle<CR>
+" inoremap <F3> <Esc>:NERDTreeToggle<CR>
 " V
 " nnoremap <Space>v :e ~/.vimrc<CR>
 " "W
@@ -1000,7 +1001,7 @@ vmap <C-v> <Plug>(expand_region_shrink)
 " nnoremap <Space>t :MBEToggle<cr>
 " }}}1
 "  < neocomplete.vim > {{{1
-if !has("lua")
+if has("lua")
     Plug 'Shougo/neocomplete.vim'
     " Note: This option must be set in .vimrc(_vimrc).  NOT IN .gvimrc(_gvimrc)!
     " Disable AutoComplPop.
@@ -1245,7 +1246,7 @@ hi SneakStreakTarget guifg=black guibg=blue ctermfg=black ctermbg=blue
 " 
 " " }}}1
 "  < vdebug > {{{1
-Plug 'vim-vdebug/vdebug'
+" Plug 'vim-vdebug/vdebug'
     let g:vdebug_options = {
     \    'port' : 9000,
     \    'timeout' : 20,
@@ -1279,15 +1280,17 @@ let g:tagbar_width=30
 Plug 'ervandew/snipmate.vim'
 " }}}1
 "  < python-mode > {{{1
-" Plug 'python-mode/python-mode'
+Plug 'python-mode/python-mode'
+" Plug '~/Downloads/python-mode'
 let g:pymode = 1
 let g:pymode_doc = 0
-let g:pymode_rope_complete_on_dot = 0
+let g:pymode_rope_complete_on_dot = 1
 let g:pymode_syntax_space_errors = 0
 " close pymode fold cause it is too slow
 let g:pymode_folding = 0
 " let g:pymode_syntax_indet_errors = 0
 let g:pymode_trim_whitespaces = 0
+let g:pymode_options_max_line_length = 102
 " }}}1
 "  < vim-repeat > {{{1
 Plug 'tpope/vim-repeat'
@@ -1332,7 +1335,8 @@ let g:syntastic_check_on_wq = 0
 let g:syntastic_mode_map = {
             \ "mode": "active",
             \ "active_filetypes": [],
-            \ "passive_filetypes": ["python", "cpp"] }
+            \ "passive_filetypes": ["cpp"] }
+            " \ "passive_filetypes": ["python", "cpp"] }
 " no +python compile for vim, so can not use pymode also
 " let g:pymode_lint_on_write = 0
 " let g:syntastic_enable_python_checker = 1
@@ -1450,4 +1454,16 @@ nnoremap <space>/ :call eregex#toggle()<CR>
 "             << ------------ Plug End >> {{{1
 call plug#end()            " required
 
+" }}}1
+"  < termdebug > {{{1
+let g:termdebug_wide = 163
+map <F11> :Step<CR>
+map <F10> :Over<CR>
+map <F7>  :Finish<CR>
+map <S-F5> :Stop<CR>
+map <F5> :Continue<CR>
+map <F9> :Break<CR>
+map <S-F9> :Delete<CR>
+" map ? :Evaluate FTRead(<C-R><C-w>)<CR>
+" map g? :Evaluate Read(<C-R><C-w>)<CR>
 " }}}1
