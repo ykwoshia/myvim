@@ -1,0 +1,6 @@
+-pthread
+-ggdb3
+-O0
+-w
+-std=c++11
+-I./src

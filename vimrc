@@ -378,7 +378,7 @@ iabbr <silent> sd self.<C-R>=Eatchar('\s')<CR>
 iabbr <silent> sc self,<C-R>=Eatchar('\s')<CR>
 " iabbr <silent> se self<C-R>=Eatchar('\s')<CR><C-R>=pyer#smartcolon#insert()<CR><C-R>=Eatchar('\s')<CR>
 iabbr <silent> r return
-" imap , ,<space>
+imap , ,<space>
 
 " }}}1
 "  < Leader Key Mapping > {{{1
@@ -1029,7 +1029,7 @@ if has("lua")
 
     " Plugin key-mappings.
     inoremap <expr><C-g>     neocomplete#undo_completion()
-    inoremap <expr><C-l>     neocomplete#complete_common_string()
+    " inoremap <expr><C-l>     neocomplete#complete_common_string()
 
     ""  " Recommended key-mappings.
     ""  " <CR>: close popup and save indent.
@@ -1097,6 +1097,10 @@ let g:ctrlp_working_path_mode = 's'
 
 
 " }}}1
+"  < vim-alpg > {{{1
+Plug '~/.vim/bundle/vim-alpg'
+
+" }}}1
 "  < vim-auto-save > {{{1
 
 Plug '907th/vim-auto-save'
@@ -1151,7 +1155,7 @@ let g:AutoPairsMapSpace = 0
 Plug 'djoshea/vim-autoread'
 " }}}1
 "  < vim-alpg > {{{1
-Plug '~/.vim/bundle/vim-alpg'
+" Plug '~/.vim/bundle/vim-alpg'
 " }}}1
 "  < vim-sneak > {{{1
 Plug 'justinmk/vim-sneak'
@@ -1323,19 +1327,29 @@ let g:syntastic_auto_loc_list = 1       "default is 0
 let g:syntastic_check_on_open = 0
 let g:syntastic_check_on_wq = 0
 
+
 " if has("lua")
-" let g:syntastic_cpp_compiler = 'g++'
+let g:syntastic_c_checkers = ['make']
+let g:syntastic_cpp_compiler = 'g++'
+let g:syntastic_cpp_compiler_options = '-pthread -O0 -w -std=c++11 -I./src -I./src/operator'
+" let g:syntastic_cpp_config_file = '.syntastic_cpp_config'
+let g:syntastic_c_make_exec = 'g++'
+let g:syntastic_c_make_args = '-fsyntax-only -pthread -O0 -w -std=c++11 -I./src -I./src/operator'
+let g:syntastic_c_make_fname = 'src/JH5400Test.cpp'
+
 " else
     " let g:syntastic_cpp_compiler = 'g++5.3'
 " endif
 
 " let g:syntastic_cpp_compiler_options = '-std=c++11 -pthread -g -O3 -w'
+" let g:syntastic_cpp_compiler_options = ''
+" let g:syntastic_c_compiler_options = ''
 
 " no pylint for syntax check
 let g:syntastic_mode_map = {
             \ "mode": "active",
-            \ "active_filetypes": [],
-            \ "passive_filetypes": ["cpp"] }
+            \ "active_filetypes": []}
+            " \ "passive_filetypes": ["cpp"] }
             " \ "passive_filetypes": ["python", "cpp"] }
 " no +python compile for vim, so can not use pymode also
 " let g:pymode_lint_on_write = 0
@@ -1466,4 +1480,5 @@ map <F9> :Break<CR>
 map <S-F9> :Delete<CR>
 " map ? :Evaluate FTRead(<C-R><C-w>)<CR>
 " map g? :Evaluate Read(<C-R><C-w>)<CR>
+packadd termdebug
 " }}}1
