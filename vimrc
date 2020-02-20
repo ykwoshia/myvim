@@ -545,8 +545,8 @@ nnoremap <Space>e :update<CR>:!make -j 4<CR>
 nnoremap <Space>r :!./a.out<CR>
 inoremap <F4> <Esc>:update<CR>:!make<CR>
 " F5 run previous command
-nnoremap <F5> :!./out<CR>
-inoremap <F5> <Esc>:!./out<CR>
+" nnoremap <F5> :!./out<CR>
+" inoremap <F5> <Esc>:!./out<CR>
 
 nnoremap <F6> :update<CR>:!./%<CR>
 inoremap <F6> <Esc>:update<CR>:!./%<CR>
@@ -616,9 +616,8 @@ endif
 " nnoremap <A-a> A:<CR>
 " inoremap <A-a> <Esc>A:<CR>
 " nnoremap <A-a> A;
-" inoremap <A-a> <Esc>A;
+inoremap <A-a> <Esc>A;<Esc>
 nnoremap <A-a> A;<Esc>
-inoremap <A-a> <Esc>A;<CR>
 
 " " " A-B
 " nnoremap <A-b> :update<CR>:!make<CR>
@@ -1284,7 +1283,7 @@ let g:tagbar_width=30
 Plug 'ervandew/snipmate.vim'
 " }}}1
 "  < python-mode > {{{1
-Plug 'python-mode/python-mode'
+" Plug 'python-mode/python-mode'
 " Plug '~/Downloads/python-mode'
 let g:pymode = 1
 let g:pymode_doc = 0
