@@ -17,6 +17,7 @@
 	rh = reset HEAD
 [credential]
 	helper = store
+#  echo https://ykwoshia:passwd@github.com > ~/.git-credentials
 [https]
 #        proxy = socks5://127.0.0.1:1080
 [http]
