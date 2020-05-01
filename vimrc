@@ -361,7 +361,7 @@ set vb t_vb=
 " }}}1
 "  < Abbr Mapping > {{{1
 
-func Eatchar(pat)
+function! Eatchar(pat)
   let c = nr2char(getchar(0))
   return (c =~ a:pat) ? '' : c
 endfunc
@@ -380,6 +380,8 @@ iabbr <silent> sc self,<C-R>=Eatchar('\s')<CR>
 " iabbr <silent> se self<C-R>=Eatchar('\s')<CR><C-R>=pyer#smartcolon#insert()<CR><C-R>=Eatchar('\s')<CR>
 iabbr <silent> r return
 imap , ,<space>
+iabbrev <silent> pp patternError->setPatternError<C-R>=Eatchar('\s')<CR>
+iabbrev <silent> tk string(((TkWord*)tktable.data[token])->spelling)<C-R>=Eatchar('\s')<CR>
 
 " }}}1
 "  < Leader Key Mapping > {{{1
@@ -472,7 +474,7 @@ nnoremap <Space>ss :%s/\s\+$//ge<cr>:nohl<cr>
 nnoremap <Space>sm :make<CR>
 nnoremap <Space>sp :set spell!<CR>
 " nnoremap <Space>sl :redraw!<CR>
-" nnoremap <Space>so :source $MYVIMRC<CR>:AirlineRefresh<CR>
+nnoremap <silent> <Space>sv :source $MYVIMRC<CR>:AirlineRefresh<CR>
 nnoremap <Space>sy :!ctags -R *<CR>
 nmap <Space>s' viwS'
 nnoremap <Space><Enter> <C-]>
@@ -503,7 +505,17 @@ nnoremap <Space>x :xa<CR>
 " ";
 " jj or jk 插入模式下go to normal mode
 " inoremap kj <Esc>
-inoremap jj <Esc>
+function! JJIsEmptyLine()
+    let line = getline('.')
+    if line =~ '^\s*$'
+        return "\<Esc>ddk"
+    else
+        return "\<Esc>"
+    end
+endfunction
+
+inoremap <expr> jj JJIsEmptyLine()
+" inoremap jj <Esc>
 imap j; jj;ce
 " inoremap kk <Esc>yyp
 inoremap jk <Right>
@@ -515,6 +527,7 @@ inoremap z; ;
 inoremap zs s
 inoremap zr r
 inoremap z= =
+inoremap z( (
 nnoremap <BS> <C-^>
 
 
@@ -1097,10 +1110,6 @@ let g:ctrlp_working_path_mode = 's'
 
 
 " }}}1
-"  < vim-alpg > {{{1
-Plug '~/.vim/bundle/vim-alpg'
-
-" }}}1
 "  < vim-auto-save > {{{1
 
 Plug '907th/vim-auto-save'
@@ -1298,6 +1307,8 @@ let g:pymode_options_max_line_length = 102
 " }}}1
 "  < vim-repeat > {{{1
 Plug 'tpope/vim-repeat'
+Plug 'vim-scripts/RepeatLast.vim'
+let g:RepeatLast_Enabled = 0
 " }}}1
 "  < visualrepeat > {{{1
 Plug 'vim-scripts/visualrepeat'
@@ -1306,6 +1317,8 @@ Plug 'vim-scripts/visualrepeat'
 
 Plug 'scrooloose/nerdcommenter'
 let NERDSpaceDelims = 1
+let g:NERDCustomDelimiters = {'c': {  'left': '//', 'leftAlt': '/*', 'rightAlt': '*/'},
+            \ 'asc': { 'left': ';;'}}
 
 Plug 'scrooloose/nerdtree'
 
@@ -1327,16 +1340,16 @@ let g:syntastic_auto_loc_list = 1       "default is 0
 let g:syntastic_check_on_open = 0
 let g:syntastic_check_on_wq = 0
 
-
+let g:syntastic_asc_checkers = ['asc']
 " if has("lua")
-" let g:syntastic_c_checkers = ['make']
+let g:syntastic_c_checkers = ['make']
 let g:syntastic_cpp_compiler = 'g++'
 " let g:syntastic_cpp_compiler_options = '-pthread -O0 -w -std=c++11 -I./src -I./src/operator'
 let g:syntastic_cpp_compiler_options = '-pthread -O0 -w -std=c++11 -I./src'
 " let g:syntastic_cpp_config_file = '.syntastic_cpp_config'
-let g:syntastic_c_make_exec = 'g++'
-let g:syntastic_c_make_args = '-fsyntax-only -pthread -O0 -w -std=c++11 -I./src -I./src/operator'
-let g:syntastic_c_make_fname = 'src/JH5400Test.cpp'
+" let g:syntastic_c_make_exec = 'gcc'
+" let g:syntastic_c_make_args = '-fsyntax-only -O0 -Wall -Wno-strict-aliasing -std=gnu11 -I.'
+" let g:syntastic_c_make_fname = 'src/JH5400Test.cpp'
 
 " else
     " let g:syntastic_cpp_compiler = 'g++5.3'
@@ -1454,7 +1467,7 @@ Plug 'vim-airline/vim-airline-themes'
 " ./install.sh
 " }}}1
 "  < Mark--Karkat > {{{1
-Plug 'vim-scripts/Mark--Karkat'
+" Plug 'vim-scripts/Mark--Karkat'
 " }}}1
 "  < vim-pyer > {{{1
 Plug 'ykwoshia/vim-pyer'
@@ -1466,14 +1479,18 @@ Plug 'othree/eregex.vim'
 let g:eregex_default_enable=0
 nnoremap <space>/ :call eregex#toggle()<CR>
 " }}}1
+"  < vim-alpg > {{{1
+Plug '~/.vim/bundle/vim-alpg'
+
+" }}}1
 "             << ------------ Plug End >> {{{1
 call plug#end()            " required
 
 " }}}1
 "  < termdebug > {{{1
 let g:termdebug_wide = 163
-map <F11> :Step<CR>
-map <F10> :Over<CR>
+map <F3> :Step<CR>
+map <F2> :Over<CR>
 map <F7>  :Finish<CR>
 map <S-F5> :Stop<CR>
 map <F5> :Continue<CR>
