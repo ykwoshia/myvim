@@ -372,6 +372,7 @@ iab cout cout <<
 iab cin cin >>
 iab #i #include
 iab #d #define
+iab #p #pragma once<C-R>=Eatchar('\s')<CR>
 iab teh the
 iabbr <silent> s self<C-R>=Eatchar('\s')<CR>
 iabbr <silent> sd self.<C-R>=Eatchar('\s')<CR>
@@ -1283,10 +1284,10 @@ let g:tagbar_width=30
 Plug 'ervandew/snipmate.vim'
 " }}}1
 "  < python-mode > {{{1
-" Plug 'python-mode/python-mode'
+Plug 'python-mode/python-mode'
 " Plug '~/Downloads/python-mode'
 let g:pymode = 1
-let g:pymode_doc = 0
+let g:pymode_doc = 1
 let g:pymode_rope_complete_on_dot = 1
 let g:pymode_syntax_space_errors = 0
 " close pymode fold cause it is too slow
@@ -1328,9 +1329,10 @@ let g:syntastic_check_on_wq = 0
 
 
 " if has("lua")
-let g:syntastic_c_checkers = ['make']
+" let g:syntastic_c_checkers = ['make']
 let g:syntastic_cpp_compiler = 'g++'
-let g:syntastic_cpp_compiler_options = '-pthread -O0 -w -std=c++11 -I./src -I./src/operator'
+" let g:syntastic_cpp_compiler_options = '-pthread -O0 -w -std=c++11 -I./src -I./src/operator'
+let g:syntastic_cpp_compiler_options = '-pthread -O0 -w -std=c++11 -I./src'
 " let g:syntastic_cpp_config_file = '.syntastic_cpp_config'
 let g:syntastic_c_make_exec = 'g++'
 let g:syntastic_c_make_args = '-fsyntax-only -pthread -O0 -w -std=c++11 -I./src -I./src/operator'
